@@ -28,10 +28,9 @@ jobs:
         run: npm ci
       - name: Configure Pages
         id: pages
+        # Pages must already be on: Settings -> Pages -> Source: GitHub Actions.
+        # (enablement: true needs admin rights the workflow token does not have here)
         uses: actions/configure-pages@v5
-        with:
-          # turns Pages on (source: GitHub Actions) on the first run, no manual setup needed
-          enablement: true
       - name: Build site
         # SITE and BASE_PATH feed astro.config.mjs: canonical links, sitemap and asset paths
         env:
