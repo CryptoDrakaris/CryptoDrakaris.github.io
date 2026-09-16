@@ -52,6 +52,8 @@
 
 - **Контакты:** только ссылки (X, TikTok владельца + официальные каналы флагманов). Формы нет: у статического хостинга нет бэкенда.
 - **Хостинг: GitHub Pages** через Actions (`.github/workflows/deploy.yml`), выбран 2026-09-16. Сборка запускается на каждый push в `main`.
+  - Сайт опубликован 2026-09-16: **https://cryptodrakaris.github.io/**, репозиторий `CryptoDrakaris/CryptoDrakaris.github.io` (репозиторий с именем `<логин>.github.io` даёт короткий адрес без под-пути).
+  - Pages включает владелец вручную (Settings → Pages → Source: GitHub Actions). `enablement: true` в `configure-pages` не работает: встроенному токену Actions не хватает прав администратора.
   - Адрес сайта в код не зашит: workflow передаёт `SITE` и `BASE_PATH` из `actions/configure-pages` в `astro.config.mjs`. Локальная сборка без этих переменных даёт корневые ссылки.
   - `public/.nojekyll` обязателен, иначе Pages выбрасывает каталог `_astro`.
   - `robots.txt` генерируется в `src/pages/robots.txt.ts` (абсолютная ссылка на sitemap с учётом под-пути), sitemap – интеграцией `@astrojs/sitemap`.
