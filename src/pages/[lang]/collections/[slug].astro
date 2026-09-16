@@ -5,7 +5,7 @@ import NftCard from '../../../components/NftCard.astro';
 import JoinBand from '../../../components/JoinBand.astro';
 import { LANGS, useT, type Lang } from '../../../i18n/ui';
 import { href } from '../../../lib/site';
-import { flagships, derived, hasImage, tokenTitle, tokenPath, type Group } from '../../../lib/collection';
+import { flagships, derived, gridSrcset, hasImage, tokenTitle, tokenPath, type Group } from '../../../lib/collection';
 import { flagshipInfo } from '../../../content/flagships';
 
 export const getStaticPaths = () => LANGS.flatMap((lang) => flagships.map((group) => ({ params: { lang, slug: group.slug }, props: { group } })));
@@ -58,7 +58,16 @@ const website = info?.links.website;
         {
           mosaic.map(({ col, token }, i) => (
             <a href={href(lang, tokenPath(col, token))} tabindex="-1" class={`tile tile-${i}`}>
-              <img src={derived(col, token, 'grid')} alt={tokenTitle(col, token)} width="600" height="600" loading={i < 3 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : undefined} />
+              <img
+                src={derived(col, token, 'grid')}
+                srcset={gridSrcset(col, token)}
+                sizes="(max-width: 900px) 30vw, 200px"
+                alt={tokenTitle(col, token)}
+                width="600"
+                height="600"
+                loading={i < 3 ? 'eager' : 'lazy'}
+                fetchpriority={i === 0 ? 'high' : undefined}
+              />
             </a>
           ))
         }

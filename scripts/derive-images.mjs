@@ -97,6 +97,7 @@ for (const group of collection.groups) {
         continue;
       }
       const src = path.join(DATA, 'originals', contract, file);
+      const thumbOut = path.join(outDir, `${t.tokenId}-thumb.webp`);
       const gridOut = path.join(outDir, `${t.tokenId}-grid.webp`);
       const fullOut = path.join(outDir, `${t.tokenId}-full.webp`);
       const isGif = /\.gif$/i.test(file);
@@ -104,10 +105,13 @@ for (const group of collection.groups) {
       try {
         if (!(await exists(gridOut)))
           await sharp(src, { ...input, animated: false }).resize({ width: 600, height: 600, fit: 'cover', withoutEnlargement: false }).webp({ quality: 86 }).toFile(gridOut);
+        // 300px copy for small card slots; the browser picks it via srcset
+        if (!(await exists(thumbOut)))
+          await sharp(src, { ...input, animated: false }).resize({ width: 300, height: 300, fit: 'cover', withoutEnlargement: false }).webp({ quality: 82 }).toFile(thumbOut);
         if (!(await exists(fullOut)))
           await sharp(src, { ...input, animated: isGif }).resize({ width: 1600, withoutEnlargement: true }).webp({ quality: 88 }).toFile(fullOut);
         const meta = await sharp(fullOut).metadata();
-        entry.tokens[t.tokenId] = { grid: true, full: true, width: meta.width, height: meta.pageHeight ?? meta.height, animated: isGif };
+        entry.tokens[t.tokenId] = { thumb: true, grid: true, full: true, width: meta.width, height: meta.pageHeight ?? meta.height, animated: isGif };
         const { dominant } = await sharp(gridOut).stats();
         samples.push(dominant);
         // also sample a small palette so a flat background doesn't win every time

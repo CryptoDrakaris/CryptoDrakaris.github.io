@@ -58,8 +58,10 @@ const members = others?.members ?? [];
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    min-height: 36px;
-    padding: 0 14px;
+    max-width: 100%;
+    min-height: 40px;
+    padding: 6px 14px;
+    overflow-wrap: anywhere;
     border: 1px solid var(--line-strong);
     border-radius: 999px;
     text-decoration: none;
@@ -87,7 +89,9 @@ const members = others?.members ?? [];
   .col h2 {
     display: flex;
     align-items: baseline;
-    gap: 12px;
+    flex-wrap: wrap;
+    overflow-wrap: anywhere;
+    gap: 4px 12px;
     font-size: calc(clamp(1.5rem, 3vw, 2.1rem) * var(--display-scale));
     margin-bottom: 20px;
   }

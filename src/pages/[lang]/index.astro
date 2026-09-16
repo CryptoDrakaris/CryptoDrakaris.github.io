@@ -7,7 +7,7 @@ import JoinBand from '../../components/JoinBand.astro';
 import Icon from '../../components/Icon.astro';
 import { LANGS, useT, type Lang } from '../../i18n/ui';
 import { href, SOCIAL } from '../../lib/site';
-import { flagships, others, collections, totalTokens, derived, hasImage, tokenTitle } from '../../lib/collection';
+import { flagships, others, collections, totalTokens, derived, gridSrcset, hasImage, tokenTitle } from '../../lib/collection';
 import { flagshipInfo } from '../../content/flagships';
 import { postsFor } from '../../lib/blog';
 
@@ -57,7 +57,15 @@ const themes = flagships.map((g) => flagshipInfo(g.slug)?.theme).filter(Boolean)
         {
           fan.map(({ g, col, token }, i) => (
             <a class={`fan-card f${i}`} href={href(lang, `collections/${g.slug}`)} tabindex="-1" data-theme={flagshipInfo(g.slug)?.theme}>
-              <img src={derived(col, token, 'grid')} alt={tokenTitle(col, token)} width="600" height="600" loading={i < 3 ? 'eager' : 'lazy'} />
+              <img
+                src={derived(col, token, 'grid')}
+                srcset={gridSrcset(col, token)}
+                sizes="(max-width: 900px) 46vw, 240px"
+                alt={tokenTitle(col, token)}
+                width="600"
+                height="600"
+                loading={i < 3 ? 'eager' : 'lazy'}
+              />
               <span class="fan-name">{g.name}</span>
             </a>
           ))
