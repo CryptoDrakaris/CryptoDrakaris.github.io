@@ -1,0 +1,31 @@
+---
+import Base from '../layouts/Base.astro';
+import { LANGS, LANG_NAME } from '../i18n/ui';
+import { href } from '../lib/site';
+---
+
+<Base lang="en" title="404">
+  <div class="wrap notfound">
+    <span class="eyebrow">404</span>
+    <h1 class="display-xl">Wrong den.</h1>
+    <p class="lead">This page does not exist. The collection lives here:</p>
+    <div class="btn-row">
+      {
+        LANGS.map((l) => (
+          <a class={l === 'en' ? 'btn btn--accent' : 'btn'} href={href(l)} hreflang={l} lang={l}>
+            {LANG_NAME[l]}
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</Base>
+
+<style>
+  .notfound {
+    display: grid;
+    gap: 20px;
+    justify-items: start;
+    padding-block: clamp(80px, 18vh, 200px);
+  }
+</style>

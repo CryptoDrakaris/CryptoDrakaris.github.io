@@ -1,0 +1,261 @@
+---
+import { LANGS, LANG_LABEL, LANG_NAME, useT, type Lang } from '../i18n/ui';
+import { href, SOCIAL } from '../lib/site';
+import Icon from './Icon.astro';
+
+interface Props {
+  lang: Lang;
+  brand?: string;
+}
+const { lang, brand } = Astro.props;
+const { t } = useT(lang);
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const rest = Astro.url.pathname.replace(new RegExp(`^${base}/${lang}/?`), '');
+
+const nav = [
+  { key: 'nav.home', path: '' },
+  { key: 'nav.collections', path: 'collections' },
+  { key: 'nav.gallery', path: 'gallery' },
+  { key: 'nav.blog', path: 'blog' },
+  { key: 'nav.about', path: 'about' },
+  { key: 'nav.contact', path: 'contact' },
+] as const;
+
+const isActive = (p: string) =>
+  p === '' ? rest === '' : rest.startsWith(p + '/') || (p === 'collections' && rest.startsWith('nft/'));
+---
+
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="logo" href={href(lang)}>
+      <span class="logo-main">DRAKARIS</span>
+      {
+        brand && (
+          <>
+            <span class="logo-x" aria-hidden="true">×</span>
+            <span class="logo-sub">{brand}</span>
+          </>
+        )
+      }
+    </a>
+
+    <nav class="nav" aria-label={t('nav.main')}>
+      {
+        nav.map((n) => (
+          <a href={href(lang, n.path)} aria-current={isActive(n.path) ? 'page' : undefined}>
+            {t(n.key)}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="tools">
+      <div class="langs" role="group" aria-label={t('nav.language')}>
+        {
+          LANGS.map((l) => (
+            <a href={`${base}/${l}/${rest}`} hreflang={l} lang={l} title={LANG_NAME[l]} aria-current={l === lang ? 'true' : undefined}>
+              {LANG_LABEL[l]}
+            </a>
+          ))
+        }
+      </div>
+      <a class="icon-link" href={SOCIAL.x.url} target="_blank" rel="noopener" aria-label="X">
+        <Icon name="x" />
+      </a>
+      <a class="icon-link" href={SOCIAL.tiktok.url} target="_blank" rel="noopener" aria-label="TikTok">
+        <Icon name="tiktok" />
+      </a>
+
+      <details class="menu">
+        <summary aria-label={t('nav.menu')}><span></span><span></span></summary>
+        <nav class="menu-panel" aria-label={t('nav.mobile')}>
+          {
+            nav.map((n) => (
+              <a href={href(lang, n.path)} aria-current={isActive(n.path) ? 'page' : undefined}>
+                {t(n.key)}
+              </a>
+            ))
+          }
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--header-bg);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    min-height: 66px;
+  }
+  .logo {
+    display: inline-flex;
+    align-items: baseline;
+    min-height: 44px;
+    align-items: center;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  /* The Drakaris wordmark stays in the owner's typeface on every theme */
+  .logo-main {
+    font-family: 'Unbounded', var(--font-display);
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.04em;
+  }
+  .logo-x {
+    color: var(--accent);
+    margin-inline: 8px;
+  }
+  .logo-sub {
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+  }
+  .nav {
+    display: flex;
+    gap: 2px;
+    margin-left: auto;
+  }
+  .nav a,
+  .menu-panel a {
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 0.9rem;
+    padding: 10px 12px;
+    border-radius: var(--btn-radius);
+    transition: color 0.2s, background-color 0.2s;
+  }
+  .nav a:hover {
+    color: var(--text);
+  }
+  .nav a[aria-current='page'] {
+    color: var(--accent);
+    background: rgb(var(--accent-rgb) / 0.12);
+  }
+  .tools {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .langs {
+    display: flex;
+    border: 1px solid var(--line);
+    border-radius: var(--btn-radius);
+    padding: 3px;
+    margin-right: 4px;
+  }
+  .langs a {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-decoration: none;
+    color: var(--muted);
+    min-width: 36px;
+    min-height: 36px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--btn-radius);
+  }
+  .langs a:hover {
+    color: var(--text);
+  }
+  .langs a[aria-current='true'] {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  .icon-link {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    color: var(--muted);
+    border-radius: var(--btn-radius);
+  }
+  .icon-link:hover {
+    color: var(--accent);
+  }
+
+  .menu {
+    display: none;
+    position: relative;
+  }
+  .menu summary {
+    list-style: none;
+    cursor: pointer;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-content: center;
+    gap: 6px;
+  }
+  .menu summary::-webkit-details-marker {
+    display: none;
+  }
+  .menu summary span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var(--text);
+    transition: transform 0.2s;
+  }
+  .menu[open] summary span:first-child {
+    transform: translateY(4px) rotate(45deg);
+  }
+  .menu[open] summary span:last-child {
+    transform: translateY(-4px) rotate(-45deg);
+  }
+  .menu-panel {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    display: grid;
+    min-width: 220px;
+    background: var(--card);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    padding: 8px;
+  }
+  .menu-panel a {
+    font-size: 1rem;
+    padding: 12px 14px;
+    border-radius: var(--radius);
+  }
+  .menu-panel a[aria-current='page'] {
+    color: var(--accent);
+  }
+
+  @media (max-width: 1060px) {
+    .nav {
+      display: none;
+    }
+    .tools {
+      margin-left: auto;
+    }
+    .menu {
+      display: block;
+    }
+  }
+  @media (max-width: 600px) {
+    .logo-x,
+    .logo-sub,
+    .icon-link {
+      display: none;
+    }
+    .bar {
+      gap: 8px;
+    }
+  }
+</style>

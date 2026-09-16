@@ -1,0 +1,109 @@
+---
+import Base from '../../../layouts/Base.astro';
+import NftCard from '../../../components/NftCard.astro';
+import { LANGS, useT, type Lang } from '../../../i18n/ui';
+import { others } from '../../../lib/collection';
+
+export const getStaticPaths = () => LANGS.map((lang) => ({ params: { lang } }));
+
+const lang = Astro.params.lang as Lang;
+const { t, tn } = useT(lang);
+const members = others?.members ?? [];
+---
+
+<Base lang={lang} title={t('others.title')}>
+  <div class="wrap">
+    <header class="page-head">
+      <span class="eyebrow">{t('others.eyebrow')}</span>
+      <h1>{t('others.title')}</h1>
+      <p class="lead">{t('others.lead', { collections: tn('collectionsN', members.length) })}</p>
+    </header>
+
+    <nav class="jump" aria-label={t('others.jump')}>
+      {
+        members.map((col) => (
+          <a href={`#${col.slug}`} style={`--chip:${col.accent}`}>
+            {col.name} <span class="mono">{col.tokens.length}</span>
+          </a>
+        ))
+      }
+    </nav>
+
+    {
+      members.map((col) => (
+        <section class="col" id={col.slug} style={`--accent:${col.accent}`}>
+          <h2>
+            {col.name} <span class="mono">{col.tokens.length}</span>
+          </h2>
+          <div class="nft-grid">
+            {col.tokens.map((token) => (
+              <NftCard lang={lang} col={col} token={token} showCollection={false} />
+            ))}
+          </div>
+        </section>
+      ))
+    }
+  </div>
+  <div class="spacer"></div>
+</Base>
+
+<style>
+  .jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: clamp(24px, 5vw, 48px);
+  }
+  .jump a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    color: var(--text);
+  }
+  .jump a::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--chip);
+  }
+  .jump a:hover {
+    border-color: var(--chip);
+  }
+  .jump .mono {
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+  .col {
+    padding-block: 36px;
+    border-top: 1px solid var(--line);
+  }
+  .col h2 {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    font-size: calc(clamp(1.5rem, 3vw, 2.1rem) * var(--display-scale));
+    margin-bottom: 20px;
+  }
+  .col h2::before {
+    content: '';
+    align-self: center;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex: none;
+  }
+  .col h2 .mono {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0;
+  }
+</style>

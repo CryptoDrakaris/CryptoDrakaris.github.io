@@ -1,0 +1,27 @@
+---
+// Static root: pick a language from the browser, fall back to English.
+import { DEFAULT_LANG, LANGS } from '../i18n/ui';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const fallback = `${base}/${DEFAULT_LANG}/`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Drakaris × Lazy Lions</title>
+    <meta name="robots" content="noindex" />
+    <meta http-equiv="refresh" content={`1; url=${fallback}`} />
+    <link rel="canonical" href={fallback} />
+    <script is:inline define:vars={{ base, langs: LANGS, fallback }}>
+      var pick = (navigator.languages || [navigator.language || ''])
+        .map(function (l) { return l.toLowerCase().slice(0, 2); })
+        .find(function (l) { return langs.indexOf(l) !== -1; });
+      location.replace(pick ? base + '/' + pick + '/' : fallback);
+    </script>
+    <style>
+      body { background: #080a0c; }
+    </style>
+  </head>
+  <body></body>
+</html>

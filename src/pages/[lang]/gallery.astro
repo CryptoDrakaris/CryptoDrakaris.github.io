@@ -1,0 +1,222 @@
+---
+import Base from '../../layouts/Base.astro';
+import NftCard from '../../components/NftCard.astro';
+import { LANGS, useT, type Lang } from '../../i18n/ui';
+import { groups, collections, owner, totalTokens, traitIndex } from '../../lib/collection';
+
+export const getStaticPaths = () => LANGS.map((lang) => ({ params: { lang } }));
+
+const lang = Astro.params.lang as Lang;
+const { t } = useT(lang);
+// traits only make sense inside one collection
+const traitsByCollection = collections.map((col) => ({ col, traits: traitIndex([col]) })).filter((x) => x.traits.length > 0);
+let eagerLeft = 4;
+---
+
+<Base lang={lang} title={t('gallery.title')}>
+  <div class="wrap">
+    <header class="page-head">
+      <span class="eyebrow">{t('gallery.eyebrow')}</span>
+      <h1>{t('gallery.title')}</h1>
+      <p class="lead">{t('gallery.lead', { ens: owner.ens })}</p>
+    </header>
+
+    <form class="filters" id="filters" aria-controls="grid">
+      <label class="main">
+        <span class="eyebrow">{t('gallery.filter.collection')}</span>
+        <select name="collection">
+          <option value="">{t('gallery.filter.all')}</option>
+          <option value="group:flagships">{t('gallery.filter.flagships')}</option>
+          {
+            groups.map((g) => (
+              <optgroup label={g.kind === 'others' ? t('others.title') : g.name}>
+                {g.kind === 'flagship' && g.members.length > 1 && <option value={`group:${g.slug}`}>{g.name} · {t('gallery.filter.all')}</option>}
+                {g.members.map((c) => (
+                  <option value={c.slug}>
+                    {c.name} ({c.tokens.length})
+                  </option>
+                ))}
+              </optgroup>
+            ))
+          }
+        </select>
+      </label>
+
+      {
+        traitsByCollection.map(({ col, traits }) => (
+          <fieldset class="traits" data-for={col.slug} hidden disabled>
+            <legend class="sr-only">{col.name}</legend>
+            {traits.map((tr) => (
+              <label>
+                <span class="eyebrow">{tr.type}</span>
+                <select name={`trait:${tr.type}`}>
+                  <option value="">{t('gallery.filter.any')}</option>
+                  {tr.values.map((v) => (
+                    <option value={v}>{v}</option>
+                  ))}
+                </select>
+              </label>
+            ))}
+          </fieldset>
+        ))
+      }
+      <p class="hint" id="hint">{t('gallery.filter.traitsHint')}</p>
+      <button type="reset" class="btn reset">{t('gallery.filter.reset')}</button>
+    </form>
+
+    <p class="count mono" id="count" aria-live="polite" data-template={t('gallery.shown')} data-total={totalTokens}>
+      {t('gallery.shown', { shown: totalTokens, total: totalTokens })}
+    </p>
+
+    <div class="nft-grid" id="grid">
+      {
+        collections.flatMap((col) =>
+          col.tokens.map((token) => {
+            const eager = eagerLeft-- > 0;
+            return <NftCard lang={lang} col={col} token={token} eager={eager} />;
+          }),
+        )
+      }
+    </div>
+    <p class="empty lead" id="empty" hidden>{t('gallery.empty')}</p>
+  </div>
+  <div class="spacer"></div>
+</Base>
+
+<script>
+  const form = document.getElementById('filters') as HTMLFormElement;
+  const colSelect = form.elements.namedItem('collection') as HTMLSelectElement;
+  const cards = [...document.querySelectorAll<HTMLAnchorElement>('#grid .nft')];
+  const sets = [...form.querySelectorAll<HTMLFieldSetElement>('fieldset.traits')];
+  const hint = document.getElementById('hint')!;
+  const count = document.getElementById('count')!;
+  const empty = document.getElementById('empty')!;
+  const FLAGSHIP_GROUPS = new Set(cards.filter((c) => c.dataset.group !== 'others').map((c) => c.dataset.group));
+
+  function syncTraitSets() {
+    const v = colSelect.value;
+    let any = false;
+    for (const fs of sets) {
+      const on = fs.dataset.for === v;
+      fs.hidden = !on;
+      fs.disabled = !on; // disabled fieldsets are left out of FormData
+      if (!on) fs.querySelectorAll('select').forEach((s) => (s.value = ''));
+      any ||= on;
+    }
+    hint.hidden = any;
+  }
+
+  function apply() {
+    const v = colSelect.value;
+    const traitFilters = [...new FormData(form).entries()].filter(([k, val]) => k.startsWith('trait:') && val) as [string, string][];
+    let shown = 0;
+    for (const card of cards) {
+      let ok = true;
+      if (v === 'group:flagships') ok = FLAGSHIP_GROUPS.has(card.dataset.group);
+      else if (v.startsWith('group:')) ok = card.dataset.group === v.slice(6);
+      else if (v) ok = card.dataset.collection === v;
+      if (ok && traitFilters.length) {
+        const traits = JSON.parse(card.dataset.traits || '{}') as Record<string, string>;
+        ok = traitFilters.every(([k, val]) => traits[k.slice(6)] === val);
+      }
+      card.hidden = !ok;
+      if (ok) shown++;
+    }
+    count.textContent = (count.dataset.template || '').replace('{shown}', String(shown)).replace('{total}', count.dataset.total || '');
+    empty.hidden = shown > 0;
+  }
+
+  form.addEventListener('change', (e) => {
+    if (e.target === colSelect) syncTraitSets();
+    apply();
+  });
+  form.addEventListener('reset', () =>
+    setTimeout(() => {
+      syncTraitSets();
+      apply();
+    }),
+  );
+  syncTraitSets();
+</script>
+
+<style>
+  .filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
+    gap: 12px;
+    align-items: end;
+    padding: 20px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+  .main {
+    grid-column: span 2;
+  }
+  .traits {
+    display: contents;
+    border: 0;
+    margin: 0;
+    padding: 0;
+  }
+  .traits[hidden] {
+    display: none;
+  }
+  label {
+    display: grid;
+    gap: 6px;
+  }
+  select {
+    appearance: none;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 34px 0 12px;
+    font: inherit;
+    font-size: 0.92rem;
+    color: var(--text);
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23ff6a3d' stroke-width='1.6'/%3E%3C/svg%3E")
+        no-repeat right 12px center,
+      var(--bg-2);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    cursor: pointer;
+  }
+  select:hover {
+    border-color: var(--accent);
+  }
+  .hint {
+    grid-column: span 2;
+    align-self: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .reset {
+    min-height: 44px;
+  }
+  .count {
+    margin: 24px 0 16px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  :global(.nft[hidden]) {
+    display: none;
+  }
+  .empty {
+    padding-block: 40px;
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  @media (max-width: 480px) {
+    .main,
+    .hint {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

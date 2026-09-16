@@ -1,0 +1,139 @@
+---
+import Base from '../../layouts/Base.astro';
+import JoinBand from '../../components/JoinBand.astro';
+import GroupCard from '../../components/GroupCard.astro';
+import { LANGS, useT, type Lang } from '../../i18n/ui';
+import { href, SOCIAL } from '../../lib/site';
+import { flagships, collections, owner, totalTokens, derived, hasImage, etherscanAddressUrl } from '../../lib/collection';
+import { flagshipInfo } from '../../content/flagships';
+
+export const getStaticPaths = () => LANGS.map((lang) => ({ params: { lang } }));
+
+const lang = Astro.params.lang as Lang;
+const { t, tn } = useT(lang);
+
+// portrait: first Lazy Lion, the owner's first love
+const lions = flagships[0]?.members[0];
+const first = lions?.tokens.find((tok) => hasImage(lions, tok));
+const portrait = lions && first ? derived(lions, first, 'full') : null;
+const ensLink = `<a class="mono" href="${etherscanAddressUrl(owner.address)}" target="_blank" rel="noopener">${owner.ens}</a>`;
+const tokensLink = `<a href="${href(lang, 'gallery')}">${tn('nfts', totalTokens)}</a>`;
+const colsLink = `<a href="${href(lang, 'collections')}">${tn('collectionsN', collections.length)}</a>`;
+const themes = flagships.map((g) => flagshipInfo(g.slug)?.theme).filter(Boolean) as any[];
+---
+
+<Base lang={lang} title={t('nav.about')} image={portrait ?? undefined} extraThemes={themes}>
+  <div class="wrap">
+    <header class="page-head about-head">
+      <div class="head-copy">
+        <span class="eyebrow">{t('about.eyebrow')}</span>
+        <h1>{t('about.title')}</h1>
+        <p class="lead">{t('about.lead')}</p>
+        <div class="btn-row">
+          <a class="btn btn--accent" href={SOCIAL.x.url} target="_blank" rel="noopener">X {SOCIAL.x.handle}</a>
+          <a class="btn" href={SOCIAL.tiktok.url} target="_blank" rel="noopener">TikTok</a>
+        </div>
+      </div>
+      {
+        portrait && (
+          <figure class="portrait">
+            <img src={portrait} alt={`Lazy Lions #${first!.tokenId}`} width="1600" height="1600" />
+          </figure>
+        )
+      }
+    </header>
+  </div>
+
+  <section class="section">
+    <div class="wrap blocks">
+      <article class="block">
+        <span class="eyebrow">01</span>
+        <h2>{t('about.me.title')}</h2>
+        <p>{t('about.me.text')}</p>
+      </article>
+      <article class="block">
+        <span class="eyebrow">02</span>
+        <h2>{t('about.wallet.title')}</h2>
+        <p set:html={t('about.wallet.text', { ens: ensLink, tokens: tokensLink, collections: colsLink })} />
+      </article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">03</span>
+        <h2>{t('about.flagships.title')}</h2>
+      </div>
+      <div class="flagships">
+        {flagships.map((g, i) => <GroupCard lang={lang} group={g} index={i} />)}
+      </div>
+      <p class="disclaimer">{t('about.disclaimer')}</p>
+    </div>
+  </section>
+
+  <JoinBand lang={lang} />
+</Base>
+
+<style>
+  .about-head {
+    grid-template-columns: 1.2fr 1fr;
+    align-items: center;
+    gap: clamp(32px, 6vw, 80px);
+  }
+  .head-copy {
+    display: grid;
+    gap: 18px;
+  }
+  .portrait {
+    margin: 0;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--line-strong);
+    max-width: 440px;
+    justify-self: end;
+    width: 100%;
+    transform: rotate(2deg);
+  }
+  .blocks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(32px, 6vw, 80px);
+  }
+  .block {
+    display: grid;
+    gap: 14px;
+    align-content: start;
+  }
+  .block h2 {
+    font-size: calc(clamp(1.8rem, 3.5vw, 2.6rem) * var(--display-scale));
+  }
+  .block p {
+    color: var(--muted);
+    font-size: 1.1rem;
+  }
+  .block :global(a) {
+    color: var(--accent);
+  }
+  .flagships {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  }
+  .disclaimer {
+    margin-top: 48px;
+    color: var(--dim);
+    font-size: 0.9rem;
+    border-left: 2px solid var(--line-strong);
+    padding-left: 14px;
+  }
+  @media (max-width: 800px) {
+    .about-head,
+    .blocks {
+      grid-template-columns: 1fr;
+    }
+    .portrait {
+      justify-self: start;
+    }
+  }
+</style>

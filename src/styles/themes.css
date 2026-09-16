@@ -1,0 +1,304 @@
+/* Themes. Every page sets <html data-theme="...">; components only use these tokens.
+   Contrast targets: --text, --muted, --dim >= 4.5:1 on --bg and --card; --accent >= 4.5:1 on --bg;
+   --accent-ink >= 4.5:1 on --accent. */
+
+/* Shape defaults, overridden by themes with a stronger graphic style */
+:root {
+  --border-w: 1px;
+  --border-color: var(--line);
+  --shadow: none;
+  --shadow-hover: none;
+  --display-transform: none;
+  --display-shadow: none;
+  color-scheme: dark;
+}
+
+/* ---------- Drakaris: the owner's shell. "Dracarys": ember on warm black. ---------- */
+:root,
+[data-theme='drakaris'] {
+  --bg: #0b0b0d;
+  --bg-2: #111113;
+  --card: #151517;
+  --line: #242428;
+  --line-strong: #34343a;
+  --text: #f2eee8;
+  --muted: #aaa49c;
+  --dim: #8d877f;
+  --accent: #ff6a3d;
+  --accent-soft: #ffa183;
+  --accent-ink: #0b0b0d;
+  --accent-rgb: 255 106 61;
+  --header-bg: rgb(11 11 13 / 0.84);
+
+  --font-display: 'Unbounded', 'Onest', system-ui, sans-serif;
+  --font-sans: 'Onest', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --display-weight: 700;
+  --display-tracking: -0.03em;
+  --display-leading: 1.02;
+  --display-scale: 0.86; /* Unbounded is wide */
+  --radius: 10px;
+  --btn-radius: 999px;
+  --glow: radial-gradient(55% 60% at 85% 20%, rgb(255 106 61 / 0.16), transparent 70%),
+    radial-gradient(40% 50% at 10% 90%, rgb(255 170 60 / 0.07), transparent 70%);
+}
+
+/* ---------- Lazy Lions: canon of lazylionsnft.com ---------- */
+[data-theme='lazy-lions'] {
+  --bg: #080a0c;
+  --bg-2: #0f1216;
+  --card: #111418;
+  --line: #1f242b;
+  --line-strong: #2c333c;
+  --text: #e7ebef;
+  --muted: #8a96a6;
+  --dim: #7d8898;
+  --accent: #c99745;
+  --accent-soft: #d4bfa0;
+  --accent-ink: #080a0c;
+  --accent-rgb: 201 151 69;
+  --header-bg: rgb(8 10 12 / 0.84);
+
+  --font-display: 'Space Grotesk', 'Onest', system-ui, sans-serif;
+  --font-sans: 'Space Grotesk', 'Onest', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --display-weight: 700;
+  --display-tracking: -0.035em;
+  --display-leading: 0.98;
+  --display-scale: 1;
+  --radius: 6px;
+  --btn-radius: 6px;
+  --glow: radial-gradient(50% 60% at 85% 30%, rgb(201 151 69 / 0.1), transparent 70%);
+}
+/* Space Grotesk has no Cyrillic: whole-page Onest on RU/KK so lines never mix faces */
+[data-theme='lazy-lions']:lang(ru),
+[data-theme='lazy-lions']:lang(kk) {
+  --font-sans: 'Onest', system-ui, sans-serif;
+  --font-display: 'Onest', system-ui, sans-serif;
+}
+
+/* Brand fonts that are commercial or lack Cyrillic are replaced by the closest
+   Google Fonts with Cyrillic + Kazakh coverage; see CLAUDE.md. */
+
+/* ---------- Gray Boys: mint sci-fi, thick cartoon outlines (archived grayboysnft.com CSS) ---------- */
+[data-theme='gray-boys'] {
+  color-scheme: light;
+  --bg: #d6f1f1;
+  --bg-2: #c4e4e1;
+  --card: #eef9f9;
+  --line: #a7cdc9;
+  --line-strong: #1a1a1a;
+  --text: #1a1a1a;
+  --muted: #384646;
+  --dim: #475857;
+  --accent: #027201;
+  --accent-soft: #038a02;
+  --accent-ink: #ffffff;
+  --accent-rgb: 2 114 1;
+  --header-bg: rgb(214 241 241 / 0.9);
+
+  --font-display: 'Exo 2', 'Montserrat', system-ui, sans-serif; /* for self-hosted "Space" */
+  --font-sans: 'Montserrat', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --display-weight: 800;
+  --display-tracking: -0.02em;
+  --display-leading: 1;
+  --display-scale: 0.95;
+  --radius: 14px;
+  --btn-radius: 12px;
+  --border-w: 2px;
+  --border-color: #1a1a1a;
+  --outline: #1a1a1a;
+  --shadow: 4px 4px 0 #1a1a1a;
+  --shadow-hover: 6px 6px 0 #1a1a1a;
+  --glow: radial-gradient(50% 60% at 85% 25%, rgb(71 55 188 / 0.14), transparent 70%),
+    radial-gradient(40% 50% at 10% 90%, rgb(2 114 1 / 0.1), transparent 70%);
+}
+
+/* ---------- Bubblegum Kids: candy pastels, comic borders (archived bubblegumkidsnft.com CSS) ---------- */
+[data-theme='bubblegum-kids'] {
+  color-scheme: light;
+  --bg: #fd9cdc;
+  --bg-2: #f6ff8e;
+  --card: #f6ff8e;
+  --line: #000000;
+  --line-strong: #000000;
+  --text: #000000;
+  --muted: #34233f;
+  --dim: #3f2d4d;
+  --accent: #2e2076;
+  --accent-soft: #4737bc;
+  --accent-ink: #ffffff;
+  --accent-rgb: 46 32 118;
+  --header-bg: rgb(253 156 220 / 0.92);
+
+  --font-display: 'Nunito', system-ui, sans-serif; /* for Adobe akagi-pro */
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --display-weight: 900;
+  --display-tracking: -0.01em;
+  --display-leading: 0.95;
+  --display-scale: 0.92;
+  --display-transform: uppercase;
+  --radius: 20px;
+  --btn-radius: 999px;
+  --border-w: 2px;
+  --border-color: #000000;
+  --outline: #000000;
+  --shadow: 4px 5px 0 #000000;
+  --shadow-hover: 6px 7px 0 #000000;
+  --glow: radial-gradient(45% 55% at 85% 25%, rgb(246 255 142 / 0.7), transparent 70%),
+    radial-gradient(40% 50% at 5% 95%, rgb(71 55 188 / 0.25), transparent 70%);
+}
+
+/* ---------- Robotos: loud flat toy colors, offset shadows (robotos.art CSS) ---------- */
+[data-theme='robotos'] {
+  color-scheme: light;
+  --bg: #fafafa;
+  --bg-2: #f9e174;
+  --card: #ffffff;
+  --line: #e0e0e0;
+  --line-strong: #1f2024;
+  --text: #1f2024;
+  --muted: #495057;
+  --dim: #555c63;
+  --accent: #c50b14; /* site red #eb0d18 darkened to pass 4.5:1 as text, also on the yellow band */
+  --accent-soft: #eb0d18;
+  --accent-ink: #ffffff;
+  --accent-rgb: 235 13 24;
+  --header-bg: rgb(250 250 250 / 0.92);
+
+  --font-display: 'Rubik', system-ui, sans-serif; /* for Right Grotesk Spatial Black */
+  --font-sans: 'IBM Plex Mono', ui-monospace, monospace; /* for Space Mono */
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --display-weight: 900;
+  --display-tracking: -0.02em;
+  --display-leading: 0.95;
+  --display-scale: 0.95;
+  --display-shadow: -4px 4px 0 #f9e174;
+  --radius: 8px;
+  --btn-radius: 8px;
+  --border-w: 2px;
+  --border-color: #1f2024;
+  --outline: #1f2024;
+  --shadow: -5px 5px 0 #1f2024;
+  --shadow-hover: -7px 7px 0 #1f2024;
+  --glow: radial-gradient(45% 55% at 85% 20%, rgb(235 13 24 / 0.1), transparent 70%),
+    radial-gradient(40% 50% at 5% 95%, rgb(249 225 116 / 0.45), transparent 70%);
+}
+
+/* ---------- Nonconformist Ducks: dark fire, sharp corners (nonconformistducks.com, 2026) ---------- */
+[data-theme='nonconformist-ducks'] {
+  --bg: #0a0a0a;
+  --bg-2: #111111;
+  --card: #151312;
+  --line: #2a2622;
+  --line-strong: #3d3630;
+  --text: #ede6d8;
+  --muted: #a39a8d; /* site #7a7269 lifted to pass 4.5:1 */
+  --dim: #938a7e;
+  --accent: #ffc533;
+  --accent-soft: #ffd666;
+  --accent-ink: #0a0a0a;
+  --accent-rgb: 255 197 51;
+  --header-bg: rgb(10 10 10 / 0.88);
+
+  --font-display: 'Anton', 'Oswald', system-ui, sans-serif;
+  --font-sans: 'Space Grotesk', 'Onest', system-ui, sans-serif;
+  --font-mono: 'Space Mono', 'JetBrains Mono', ui-monospace, monospace;
+  --display-weight: 400;
+  --display-tracking: 0.01em;
+  --display-leading: 0.95;
+  --display-scale: 1.05;
+  --display-transform: uppercase;
+  --radius: 0px;
+  --btn-radius: 0px;
+  --glow: radial-gradient(55% 60% at 85% 30%, rgb(196 39 30 / 0.22), transparent 70%),
+    radial-gradient(40% 45% at 70% 60%, rgb(255 197 51 / 0.1), transparent 70%);
+}
+/* Anton, Space Grotesk, Space Mono have no Cyrillic */
+[data-theme='nonconformist-ducks']:lang(ru),
+[data-theme='nonconformist-ducks']:lang(kk) {
+  --font-display: 'Oswald', system-ui, sans-serif;
+  --font-sans: 'Onest', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --display-weight: 700;
+  --display-scale: 1;
+}
+
+/* ---------- Adam Bomb Squad: streetwear cartoon, red/black/white/yellow (archived adambombsquad.com CSS) ---------- */
+[data-theme='adam-bomb-squad'] {
+  color-scheme: light;
+  --bg: #ffffff;
+  --bg-2: #fff200;
+  --card: #ffffff;
+  --line: #c4c4c4;
+  --line-strong: #000000;
+  --text: #000000;
+  --muted: #303030;
+  --dim: #3d3d3d;
+  --accent: #d41b20; /* site red #ec2227 darkened to pass 4.5:1 as text */
+  --accent-soft: #ec2227;
+  --accent-ink: #ffffff;
+  --accent-rgb: 236 34 39;
+  --header-bg: rgb(255 255 255 / 0.94);
+
+  --font-display: 'Open Sans', system-ui, sans-serif; /* Open Sans Condensed 700 via wdth axis */
+  --font-sans: 'Montserrat', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --display-weight: 800;
+  --display-tracking: -0.01em;
+  --display-leading: 0.92;
+  --display-scale: 1.05;
+  --display-transform: uppercase;
+  --radius: 0px;
+  --btn-radius: 0px;
+  --border-w: 3px;
+  --border-color: #000000;
+  --outline: #000000;
+  --shadow: 7px 7px 0 #000000;
+  --shadow-hover: 9px 9px 0 #000000;
+  --glow: linear-gradient(180deg, rgb(160 214 255 / 0.55), transparent 55%);
+}
+[data-theme='adam-bomb-squad'] h1,
+[data-theme='adam-bomb-squad'] h2,
+[data-theme='adam-bomb-squad'] h3 {
+  font-stretch: 75%;
+}
+
+/* ---------- MarsCatsVoyage: near-black, deep-space navy, hot orange (marscatsvoyage.com CSS) ---------- */
+[data-theme='mars-cats-voyage'] {
+  --bg: #131313;
+  --bg-2: #181a1c;
+  --card: #181a1c;
+  --line: #24272b;
+  --line-strong: #383c42;
+  --text: #ffffff;
+  --muted: #a3a7b0; /* site greys #898d97/#666 lifted to pass 4.5:1 */
+  --dim: #979ba4;
+  --accent: #ff3200;
+  --accent-soft: #fe6438;
+  --accent-ink: #131313; /* white on their orange is only 3.7:1 */
+  --accent-rgb: 255 50 0;
+  --header-bg: rgb(0 0 0 / 0.84);
+
+  --font-display: 'Sora', 'Onest', system-ui, sans-serif;
+  --font-sans: 'Sora', 'Onest', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --display-weight: 700;
+  --display-tracking: -0.02em;
+  --display-leading: 1.02;
+  --display-scale: 0.92;
+  --radius: 10px;
+  --btn-radius: 100px;
+  --shadow: 0 9px 19px rgb(0 0 0 / 0.25);
+  --shadow-hover: 0 10px 50px 5px rgb(0 0 0 / 0.4);
+  --glow: radial-gradient(60% 65% at 80% 15%, rgb(15 34 57 / 0.85), transparent 70%),
+    radial-gradient(40% 45% at 10% 90%, rgb(255 50 0 / 0.12), transparent 70%);
+}
+/* Sora ships latin only */
+[data-theme='mars-cats-voyage']:lang(ru),
+[data-theme='mars-cats-voyage']:lang(kk) {
+  --font-display: 'Onest', system-ui, sans-serif;
+  --font-sans: 'Onest', system-ui, sans-serif;
+}

@@ -1,0 +1,116 @@
+---
+import Base from '../../../layouts/Base.astro';
+import GroupCard from '../../../components/GroupCard.astro';
+import { LANGS, useT, type Lang } from '../../../i18n/ui';
+import { href } from '../../../lib/site';
+import { flagships, others, collections, totalTokens, derived, hasImage } from '../../../lib/collection';
+import { flagshipInfo } from '../../../content/flagships';
+
+export const getStaticPaths = () => LANGS.map((lang) => ({ params: { lang } }));
+
+const lang = Astro.params.lang as Lang;
+const { t, tn } = useT(lang);
+const themes = flagships.map((g) => flagshipInfo(g.slug)?.theme).filter(Boolean) as any[];
+---
+
+<Base lang={lang} title={t('nav.collections')} extraThemes={themes}>
+  <div class="wrap">
+    <header class="page-head">
+      <span class="eyebrow">{t('collections.eyebrow')}</span>
+      <h1>{t('collections.title')}</h1>
+      <p class="lead">{t('collections.lead', { tokens: tn('nfts', totalTokens), collections: tn('collectionsN', collections.length) })}</p>
+    </header>
+
+    <h2 class="eyebrow block-title">{t('home.flagships.eyebrow')}</h2>
+    <div class="flagships">
+      {flagships.map((g, i) => <GroupCard lang={lang} group={g} index={i} />)}
+    </div>
+
+    {
+      others && others.members.length > 0 && (
+        <>
+          <div class="others-head">
+            <h2 class="eyebrow block-title">{t('others.title')} · {tn('collectionsN', others.members.length)}</h2>
+            <a class="link-arrow" href={href(lang, 'collections/others')}>{t('home.others.cta')}</a>
+          </div>
+          <ul class="others">
+            {others.members.map((col) => {
+              const cover = col.tokens.find((tok) => hasImage(col, tok));
+              return (
+                <li>
+                  <a href={href(lang, `collections/others`) + `#${col.slug}`} style={`--row-accent:${col.accent}`}>
+                    {cover ? <img src={derived(col, cover, 'grid')} alt="" width="56" height="56" loading="lazy" /> : <span class="dot" />}
+                    <span class="name">{col.name}</span>
+                    <span class="n mono">{col.tokens.length}</span>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )
+    }
+  </div>
+  <div class="spacer"></div>
+</Base>
+
+<style>
+  .block-title {
+    margin: 0 0 16px;
+    font-weight: 500;
+  }
+  .flagships {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr));
+  }
+  .others-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    margin-top: clamp(48px, 8vw, 88px);
+  }
+  .others {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  }
+  .others a {
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 16px 8px 8px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--row-accent);
+    border-radius: var(--radius);
+    text-decoration: none;
+    transition: border-color 0.2s;
+  }
+  .others a:hover {
+    border-color: var(--row-accent);
+  }
+  .others img,
+  .dot {
+    width: 56px;
+    height: 56px;
+    border-radius: calc(var(--radius) - 4px);
+    object-fit: cover;
+  }
+  .dot {
+    display: block;
+    background: radial-gradient(circle, var(--row-accent), transparent 70%);
+  }
+  .name {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+  .n {
+    color: var(--muted);
+  }
+</style>
