@@ -5,7 +5,6 @@ import GroupCard from '../../components/GroupCard.astro';
 import { LANGS, useT, type Lang } from '../../i18n/ui';
 import { href, SOCIAL } from '../../lib/site';
 import { flagships, collections, owner, totalTokens, derived, hasImage, etherscanAddressUrl } from '../../lib/collection';
-import { flagshipInfo } from '../../content/flagships';
 
 export const getStaticPaths = () => LANGS.map((lang) => ({ params: { lang } }));
 
@@ -19,10 +18,9 @@ const portrait = lions && first ? derived(lions, first, 'full') : null;
 const ensLink = `<a class="mono" href="${etherscanAddressUrl(owner.address)}" target="_blank" rel="noopener">${owner.ens}</a>`;
 const tokensLink = `<a href="${href(lang, 'gallery')}">${tn('nfts', totalTokens)}</a>`;
 const colsLink = `<a href="${href(lang, 'collections')}">${tn('collectionsN', collections.length)}</a>`;
-const themes = flagships.map((g) => flagshipInfo(g.slug)?.theme).filter(Boolean) as any[];
 ---
 
-<Base lang={lang} title={t('nav.about')} image={portrait ?? undefined} extraThemes={themes}>
+<Base lang={lang} title={t('nav.about')} image={portrait ?? undefined}>
   <div class="wrap">
     <header class="page-head about-head">
       <div class="head-copy">
@@ -47,12 +45,10 @@ const themes = flagships.map((g) => flagshipInfo(g.slug)?.theme).filter(Boolean)
   <section class="section">
     <div class="wrap blocks">
       <article class="block">
-        <span class="eyebrow">01</span>
         <h2>{t('about.me.title')}</h2>
         <p>{t('about.me.text')}</p>
       </article>
       <article class="block">
-        <span class="eyebrow">02</span>
         <h2>{t('about.wallet.title')}</h2>
         <p set:html={t('about.wallet.text', { ens: ensLink, tokens: tokensLink, collections: colsLink })} />
       </article>
@@ -62,7 +58,6 @@ const themes = flagships.map((g) => flagshipInfo(g.slug)?.theme).filter(Boolean)
   <section class="section">
     <div class="wrap">
       <div class="section-head">
-        <span class="eyebrow">03</span>
         <h2>{t('about.flagships.title')}</h2>
       </div>
       <div class="flagships">

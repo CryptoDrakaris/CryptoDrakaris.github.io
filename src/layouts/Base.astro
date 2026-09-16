@@ -3,7 +3,7 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { LANGS, useT, type Lang } from '../i18n/ui';
-import { fontsHref, type ThemeKey } from '../lib/themes';
+import type { ThemeKey } from '../lib/themes';
 
 interface Props {
   lang: Lang;
@@ -15,11 +15,9 @@ interface Props {
   brand?: string;
   /** Per-collection accent override for pages in the Drakaris shell */
   accent?: string;
-  /** Also load fonts of these themes (pages that show themed flagship cards) */
-  extraThemes?: ThemeKey[];
 }
 
-const { lang, title, description, image, theme = 'drakaris', brand, accent, extraThemes = [] } = Astro.props;
+const { lang, title, description, image, theme = 'drakaris', brand, accent } = Astro.props;
 const { t } = useT(lang);
 const siteName = 'Drakaris';
 const fullTitle = title ? `${title} · ${siteName}` : `${siteName} – ${t('meta.tagline')}`;
@@ -56,9 +54,6 @@ function hexRgb(h: string) {
     <meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
     <meta name="twitter:creator" content="@cryptodrakaris" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href={fontsHref(theme, extraThemes)} />
   </head>
   <body>
     <a class="skip" href="#main">{t('nav.skip')}</a>
