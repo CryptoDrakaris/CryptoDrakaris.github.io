@@ -1,4 +1,5 @@
 /* Shared layout and components. Colors, fonts and shape come from themes.css tokens. */
+@import './fonts.css';
 @import './themes.css';
 
 :root {

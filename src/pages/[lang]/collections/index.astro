@@ -4,16 +4,14 @@ import GroupCard from '../../../components/GroupCard.astro';
 import { LANGS, useT, type Lang } from '../../../i18n/ui';
 import { href } from '../../../lib/site';
 import { flagships, others, collections, totalTokens, derived, hasImage } from '../../../lib/collection';
-import { flagshipInfo } from '../../../content/flagships';
 
 export const getStaticPaths = () => LANGS.map((lang) => ({ params: { lang } }));
 
 const lang = Astro.params.lang as Lang;
 const { t, tn } = useT(lang);
-const themes = flagships.map((g) => flagshipInfo(g.slug)?.theme).filter(Boolean) as any[];
 ---
 
-<Base lang={lang} title={t('nav.collections')} extraThemes={themes}>
+<Base lang={lang} title={t('nav.collections')}>
   <div class="wrap">
     <header class="page-head">
       <span class="eyebrow">{t('collections.eyebrow')}</span>

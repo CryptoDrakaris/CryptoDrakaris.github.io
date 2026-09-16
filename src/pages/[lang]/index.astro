@@ -29,14 +29,12 @@ const othersPreview = (others?.members ?? [])
   .flatMap((col) => col.tokens.filter((tok) => hasImage(col, tok)).slice(0, 1).map((token) => ({ col, token })))
   .slice(0, 8);
 const posts = (await postsFor(lang)).slice(0, 3);
-const themes = flagships.map((g) => flagshipInfo(g.slug)?.theme).filter(Boolean) as any[];
 ---
 
-<Base lang={lang} image={fan[0] ? derived(fan[0].col, fan[0].token, 'full') : undefined} extraThemes={themes}>
+<Base lang={lang} image={fan[0] ? derived(fan[0].col, fan[0].token, 'full') : undefined}>
   <section class="hero">
     <div class="wrap hero-grid">
       <div class="hero-copy">
-        <span class="eyebrow">{t('home.eyebrow')}</span>
         <h1 class="display-xl">
           <span>{t('home.title.1')}</span>
           <span class="accent">{t('home.title.2')}</span>
@@ -46,11 +44,6 @@ const themes = flagships.map((g) => flagshipInfo(g.slug)?.theme).filter(Boolean)
           <a class="btn btn--accent" href={href(lang, 'collections')}>{t('home.cta.collections')}</a>
           <a class="btn" href={SOCIAL.x.url} target="_blank" rel="noopener"><Icon name="x" /> {t('home.cta.follow')}</a>
         </div>
-        <dl class="stats">
-          <div><dt>{t('home.stat.tokens')}</dt><dd>{nf.format(totalTokens)}</dd></div>
-          <div><dt>{t('home.stat.collections')}</dt><dd>{collections.length}</dd></div>
-          <div><dt>{t('home.stat.flagships')}</dt><dd>{flagships.length}</dd></div>
-        </dl>
       </div>
 
       <div class="fan" aria-hidden="true">
@@ -74,11 +67,18 @@ const themes = flagships.map((g) => flagshipInfo(g.slug)?.theme).filter(Boolean)
     </div>
   </section>
 
+  <div class="stats-band">
+    <dl class="wrap stats">
+      <div><dd>{nf.format(totalTokens)}</dd><dt>{t('home.stat.tokens')}</dt></div>
+      <div><dd>{collections.length}</dd><dt>{t('home.stat.collections')}</dt></div>
+      <div><dd>{flagships.length}</dd><dt>{t('home.stat.flagships')}</dt></div>
+    </dl>
+  </div>
+
   <section class="section">
     <div class="wrap">
       <div class="section-head section-head--row">
         <div class="stack">
-          <span class="eyebrow">{t('home.flagships.eyebrow')}</span>
           <h2>{t('home.flagships.title')}</h2>
           <p class="lead">{t('home.flagships.lead')}</p>
         </div>
@@ -96,7 +96,6 @@ const themes = flagships.map((g) => flagshipInfo(g.slug)?.theme).filter(Boolean)
         <div class="wrap">
           <div class="section-head section-head--row">
             <div class="stack">
-              <span class="eyebrow">{t('home.others.eyebrow')}</span>
               <h2>{t('home.others.title')}</h2>
               <p class="lead">
                 {t('home.others.lead')} {tn('collectionsN', others.members.length)} · {tn('nfts', others.count)}.
@@ -116,7 +115,6 @@ const themes = flagships.map((g) => flagshipInfo(g.slug)?.theme).filter(Boolean)
     <div class="wrap">
       <div class="section-head section-head--row">
         <div class="stack">
-          <span class="eyebrow">{t('home.blog.eyebrow')}</span>
           <h2>{t('home.blog.title')}</h2>
         </div>
         <a class="link-arrow" href={href(lang, 'blog')}>{t('home.blog.all')}</a>
@@ -148,29 +146,43 @@ const themes = flagships.map((g) => flagshipInfo(g.slug)?.theme).filter(Boolean)
   h1 span {
     display: block;
   }
-  .stats {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px 36px;
-    margin: 12px 0 0;
-    padding-top: 24px;
+  /* numbers band between the hero and the flagship grid */
+  .stats-band {
     border-top: 1px solid var(--line);
+    background: var(--bg-2);
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-block: 0;
   }
   .stats div {
-    display: grid;
-    gap: 2px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding-block: clamp(20px, 3vw, 32px);
+  }
+  .stats div + div {
+    padding-left: clamp(16px, 3vw, 40px);
+    border-left: 1px solid var(--line);
   }
   .stats dt {
-    order: 2;
     color: var(--muted);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
   }
   .stats dd {
     margin: 0;
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 2rem;
+    font-size: calc(clamp(2rem, 4vw, 3rem) * var(--display-scale));
     line-height: 1;
+    color: var(--accent);
+  }
+  @media (max-width: 560px) {
+    .stats div {
+      flex-direction: column;
+      gap: 4px;
+    }
   }
 
   /* fan of flagship covers */
