@@ -1,7 +1,7 @@
 ---
 import type { Lang } from '../i18n/ui';
 import { href } from '../lib/site';
-import { derived, hasImage, tokenLabel, tokenTitle, tokenPath, media, type Collection, type Token } from '../lib/collection';
+import { derived, gridSrcset, hasImage, tokenLabel, tokenTitle, tokenPath, media, type Collection, type Token } from '../lib/collection';
 
 interface Props {
   lang: Lang;
@@ -28,7 +28,16 @@ const kind = m?.animated ? 'GIF' : m?.kind && !m.grid && m.kind !== 'none' && m.
   <div class="img">
     {
       hasImage(col, token) ? (
-        <img src={derived(col, token, 'grid')} alt={tokenTitle(col, token)} width="600" height="600" loading={eager ? 'eager' : 'lazy'} decoding="async" />
+        <img
+          src={derived(col, token, 'grid')}
+          srcset={gridSrcset(col, token)}
+          sizes="(max-width: 480px) 45vw, (max-width: 900px) 30vw, 230px"
+          alt={tokenTitle(col, token)}
+          width="600"
+          height="600"
+          loading={eager ? 'eager' : 'lazy'}
+          decoding="async"
+        />
       ) : (
         <div class="placeholder" role="img" aria-label={tokenTitle(col, token)}>
           <span>{col.name}</span>
@@ -111,8 +120,7 @@ const kind = m?.animated ? 'GIF' : m?.kind && !m.grid && m.kind !== 'none' && m.
   .col {
     color: var(--muted);
     font-size: 0.85rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
   }
 </style>

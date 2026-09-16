@@ -7,6 +7,7 @@ import { href } from '../../../../lib/site';
 import {
   collections,
   derived,
+  fullSrcset,
   hasImage,
   fullSize,
   originalUrl,
@@ -81,7 +82,15 @@ const description = token.description && token.description.trim() !== col.name &
       {
         full ? (
           <a class="art" href={original ?? full} target="_blank" rel="noopener" title={t('token.original')}>
-            <img src={full} alt={title} width={size.width} height={size.height} fetchpriority="high" />
+            <img
+              src={full}
+              srcset={fullSrcset(col, token)}
+              sizes="(max-width: 860px) 92vw, 46vw"
+              alt={title}
+              width={size.width}
+              height={size.height}
+              fetchpriority="high"
+            />
           </a>
         ) : (
           <div class="art placeholder">
@@ -284,6 +293,9 @@ const description = token.description && token.description.trim() !== col.name &
     overflow-wrap: anywhere;
   }
   dd a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
     color: var(--accent);
   }
   .note {

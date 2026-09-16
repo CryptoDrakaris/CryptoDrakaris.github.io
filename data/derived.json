@@ -2,6 +2,7 @@
   "0x8943c7bac1914c9a7aba750bf2b6b09fd21037e0": {
     "tokens": {
       "4846": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -9,6 +10,7 @@
         "animated": false
       },
       "5597": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -16,6 +18,7 @@
         "animated": false
       },
       "6080": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -23,6 +26,7 @@
         "animated": false
       },
       "8511": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -30,6 +34,7 @@
         "animated": false
       },
       "9092": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -37,6 +42,7 @@
         "animated": false
       },
       "9124": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -49,6 +55,7 @@
   "0xe6a9826e3b6638d01de95b55690bd4ee7eff9441": {
     "tokens": {
       "13348": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -56,6 +63,7 @@
         "animated": false
       },
       "16846": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -63,6 +71,7 @@
         "animated": false
       },
       "17597": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -70,6 +79,7 @@
         "animated": false
       },
       "18080": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -77,6 +87,7 @@
         "animated": false
       },
       "19240": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -84,6 +95,7 @@
         "animated": false
       },
       "20511": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -91,6 +103,7 @@
         "animated": false
       },
       "21092": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -98,6 +111,7 @@
         "animated": false
       },
       "21124": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -105,6 +119,7 @@
         "animated": false
       },
       "26846": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -112,6 +127,7 @@
         "animated": false
       },
       "31124": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -124,6 +140,7 @@
   "0x835a6e20348b89831f2d23493f06f9e03a6ce3a3": {
     "tokens": {
       "102": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -131,6 +148,7 @@
         "animated": false
       },
       "170": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -138,6 +156,7 @@
         "animated": false
       },
       "1095": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -145,6 +164,7 @@
         "animated": false
       },
       "1096": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -152,6 +172,7 @@
         "animated": false
       },
       "1097": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -159,6 +180,7 @@
         "animated": false
       },
       "1098": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -166,6 +188,7 @@
         "animated": false
       },
       "1099": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -173,6 +196,7 @@
         "animated": false
       },
       "1100": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -180,6 +204,7 @@
         "animated": false
       },
       "1101": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -187,6 +212,7 @@
         "animated": false
       },
       "1102": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -199,6 +225,7 @@
   "0xd80eef7484c8fab1912a43e44a97774093007ab1": {
     "tokens": {
       "8033": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -211,6 +238,7 @@
   "0xf1739d53e816212a788511e3b42f8604a9417a2a": {
     "tokens": {
       "0": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 523,
@@ -223,6 +251,7 @@
   "0x8d4100897447d173289560bc85c5c432be4f44e4": {
     "tokens": {
       "2369": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -230,6 +259,7 @@
         "animated": false
       },
       "2473": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -237,6 +267,7 @@
         "animated": false
       },
       "9352": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -249,6 +280,7 @@
   "0xa5ae87b40076745895bb7387011ca8de5fde37e0": {
     "tokens": {
       "838": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1080,
@@ -256,6 +288,7 @@
         "animated": false
       },
       "1184": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1080,
@@ -263,6 +296,7 @@
         "animated": false
       },
       "2445": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1080,
@@ -270,6 +304,7 @@
         "animated": false
       },
       "2753": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1080,
@@ -277,6 +312,7 @@
         "animated": false
       },
       "3977": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1080,
@@ -284,6 +320,7 @@
         "animated": false
       },
       "5322": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1080,
@@ -291,6 +328,7 @@
         "animated": false
       },
       "6143": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1080,
@@ -298,6 +336,7 @@
         "animated": false
       },
       "7713": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1080,
@@ -305,6 +344,7 @@
         "animated": false
       },
       "9045": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1080,
@@ -312,6 +352,7 @@
         "animated": false
       },
       "9572": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1080,
@@ -319,6 +360,7 @@
         "animated": false
       },
       "9900": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1080,
@@ -331,6 +373,7 @@
   "0x099689220846644f87d1137665cded7bf3422747": {
     "tokens": {
       "3773": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 580,
@@ -338,6 +381,7 @@
         "animated": true
       },
       "5617": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 580,
@@ -345,6 +389,7 @@
         "animated": true
       },
       "6046": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 580,
@@ -352,6 +397,7 @@
         "animated": true
       },
       "7796": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 580,
@@ -359,6 +405,7 @@
         "animated": true
       },
       "8590": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 580,
@@ -371,6 +418,7 @@
   "0x4e962d488412a14aa37eacadcb83f18c7e2271a7": {
     "tokens": {
       "3918": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 532,
@@ -378,6 +426,7 @@
         "animated": true
       },
       "6023": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 532,
@@ -385,6 +434,7 @@
         "animated": true
       },
       "7023": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 532,
@@ -392,6 +442,7 @@
         "animated": true
       },
       "7732": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 532,
@@ -404,6 +455,7 @@
   "0x0e1f990d264a9818460dde1b81c0b04d8a88e751": {
     "tokens": {
       "5": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -416,6 +468,7 @@
   "0x0f4b28d46cab209bc5fa987a92a26a5680538e45": {
     "tokens": {
       "1922": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -423,6 +476,7 @@
         "animated": false
       },
       "4164": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -430,6 +484,7 @@
         "animated": false
       },
       "4365": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -437,6 +492,7 @@
         "animated": false
       },
       "4366": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -444,6 +500,7 @@
         "animated": false
       },
       "4609": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -451,6 +508,7 @@
         "animated": false
       },
       "4971": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -458,6 +516,7 @@
         "animated": false
       },
       "5148": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -465,6 +524,7 @@
         "animated": false
       },
       "5510": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -472,6 +532,7 @@
         "animated": false
       },
       "5572": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -479,6 +540,7 @@
         "animated": false
       },
       "8581": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -486,6 +548,7 @@
         "animated": false
       },
       "8582": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -493,6 +556,7 @@
         "animated": false
       },
       "9528": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -500,6 +564,7 @@
         "animated": false
       },
       "9574": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -507,6 +572,7 @@
         "animated": false
       },
       "9952": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -519,6 +585,7 @@
   "0x7ab2352b1d2e185560494d5e577f9d3c238b78c5": {
     "tokens": {
       "7485": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -526,6 +593,7 @@
         "animated": false
       },
       "7815": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -533,6 +601,7 @@
         "animated": false
       },
       "8178": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -600,6 +669,7 @@
   "0x8eb2ee5dbceeadc3ab5929f03361ba0e23701f27": {
     "tokens": {
       "384": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1030,
@@ -607,6 +677,7 @@
         "animated": true
       },
       "1367": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1030,
@@ -614,6 +685,7 @@
         "animated": true
       },
       "2067": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 512,
@@ -621,6 +693,7 @@
         "animated": true
       },
       "2304": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1030,
@@ -628,6 +701,7 @@
         "animated": true
       },
       "2673": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1030,
@@ -635,6 +709,7 @@
         "animated": true
       },
       "2688": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1030,
@@ -642,6 +717,7 @@
         "animated": true
       },
       "2918": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1030,
@@ -654,6 +730,7 @@
   "0xdd467a6c8ae2b39825a452e06b4fa82f73d4253d": {
     "tokens": {
       "2643": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 700,
@@ -661,6 +738,7 @@
         "animated": false
       },
       "3120": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 700,
@@ -668,6 +746,7 @@
         "animated": false
       },
       "4760": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 700,
@@ -675,6 +754,7 @@
         "animated": false
       },
       "4811": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 700,
@@ -682,6 +762,7 @@
         "animated": false
       },
       "5644": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 700,
@@ -689,6 +770,7 @@
         "animated": false
       },
       "7698": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 700,
@@ -701,6 +783,7 @@
   "0xbe477f544a6d1d4143ce3115be30489c26ee14e2": {
     "tokens": {
       "143": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -708,6 +791,7 @@
         "animated": false
       },
       "198": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -715,6 +799,7 @@
         "animated": false
       },
       "199": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -722,6 +807,7 @@
         "animated": false
       },
       "200": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -729,6 +815,7 @@
         "animated": false
       },
       "369": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -736,6 +823,7 @@
         "animated": false
       },
       "482": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -778,6 +866,7 @@
   "0x80a4b80c653112b789517eb28ac111519b608b19": {
     "tokens": {
       "1636": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -785,6 +874,7 @@
         "animated": false
       },
       "2086": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -792,6 +882,7 @@
         "animated": false
       },
       "5211": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -799,6 +890,7 @@
         "animated": false
       },
       "9624": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -811,6 +903,7 @@
   "0x3776e86b9a14c4d020eb3ac6888fd21864c500a9": {
     "tokens": {
       "456": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -818,6 +911,7 @@
         "animated": false
       },
       "1240": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -825,6 +919,7 @@
         "animated": false
       },
       "1770": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -832,6 +927,7 @@
         "animated": false
       },
       "4406": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -844,6 +940,7 @@
   "0x86e9c5ad3d4b5519da2d2c19f5c71baa5ef40933": {
     "tokens": {
       "2924": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1080,
@@ -851,6 +948,7 @@
         "animated": false
       },
       "5724": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1080,
@@ -858,6 +956,7 @@
         "animated": false
       },
       "8858": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1080,
@@ -865,6 +964,7 @@
         "animated": false
       },
       "9609": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1080,
@@ -877,6 +977,7 @@
   "0x06012c8cf97bead5deae237070f9587f8e7a266d": {
     "tokens": {
       "446472": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -884,6 +985,7 @@
         "animated": false
       },
       "920197": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -891,6 +993,7 @@
         "animated": false
       },
       "2008574": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -903,6 +1006,7 @@
   "0x869fb8a354a565f7576009a88f2e8b7159a20010": {
     "tokens": {
       "4846": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -910,6 +1014,7 @@
         "animated": false
       },
       "6080": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -917,6 +1022,7 @@
         "animated": false
       },
       "9124": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -929,6 +1035,7 @@
   "0x2b00ef8f7545dba5b6ac39c0737eeb89a4c9e274": {
     "tokens": {
       "1376": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -936,6 +1043,7 @@
         "animated": false
       },
       "2309": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -943,6 +1051,7 @@
         "animated": false
       },
       "3394": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -955,6 +1064,7 @@
   "0xf90733ab2f368ffe41bfba80443e04fc33321f67": {
     "tokens": {
       "1": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1024,
@@ -962,6 +1072,7 @@
         "animated": true
       },
       "3": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 600,
@@ -969,6 +1080,7 @@
         "animated": true
       },
       "5": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 600,
@@ -981,6 +1093,7 @@
   "0xf36446105ff682999a442b003f2224bcb3d82067": {
     "tokens": {
       "1318": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1000,
@@ -988,6 +1101,7 @@
         "animated": true
       },
       "7853": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1000,
@@ -1000,6 +1114,7 @@
   "0xe4cfae3aa41115cb94cff39bb5dbae8bd0ea9d41": {
     "tokens": {
       "141": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 480,
@@ -1007,6 +1122,7 @@
         "animated": false
       },
       "3949": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 480,
@@ -1019,6 +1135,7 @@
   "0x4d7d2e237d64d1484660b55c0a4cc092fa5e6716": {
     "tokens": {
       "4230": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1500,
@@ -1026,6 +1143,7 @@
         "animated": false
       },
       "6122": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1500,
@@ -1043,6 +1161,7 @@
         "kind": "none"
       },
       "101125177075828551193544778406826026804055500093423551377085777405241987912420": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1125,
@@ -1070,6 +1189,7 @@
   "0x7b7dad77e4090160f9cb6ba57a5a774c12d4c28a": {
     "tokens": {
       "3273": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -1077,6 +1197,7 @@
         "animated": false
       },
       "3275": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -1089,6 +1210,7 @@
   "0x22c08c358f62f35b742d023bf2faf67e30e5376e": {
     "tokens": {
       "11382": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1500,
@@ -1101,6 +1223,7 @@
   "0x72c1cb01dcbe46c9e912ab5aef5bf0bed21a6e55": {
     "tokens": {
       "4596": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -1113,6 +1236,7 @@
   "0x19b86299c21505cdf59ce63740b240a9c822b5e4": {
     "tokens": {
       "4230": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -1125,6 +1249,7 @@
   "0x4fbdc4ef27b915d42b99de157485312e1df056d8": {
     "tokens": {
       "1319319896042156330065111690264448072945660751603": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -1137,6 +1262,7 @@
   "0x42cbfe5c5c1646856ef117735fa2b3ce0e4e5df0": {
     "tokens": {
       "1636": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 400,
@@ -1149,6 +1275,7 @@
   "0x97db06308b1f139d57b4cb364a7397cbe3127035": {
     "tokens": {
       "2643": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -1161,6 +1288,7 @@
   "0x7aa4ac1399e2af80fb19c6d383e50232ccb57ad1": {
     "tokens": {
       "0": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 360,
@@ -1173,6 +1301,7 @@
   "0xf7143ba42d40eaeb49b88dac0067e54af042e963": {
     "tokens": {
       "4399": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1280,
@@ -1185,6 +1314,7 @@
   "0xa96602e7f43b8b01d3a746bf2e178ef6dde7880d": {
     "tokens": {
       "972": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -1197,6 +1327,7 @@
   "0x955c97e1132fdd106cd5b1ee0986271eeee7667e": {
     "tokens": {
       "26959946667150639794667015087019630673637144422540572481103610249561": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 720,
@@ -1209,6 +1340,7 @@
   "0x31f3bba9b71cb1d5e96cd62f0ba3958c034b55e9": {
     "tokens": {
       "1640": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -1221,6 +1353,7 @@
   "0x1645787ddcb380932130f0d8c22e6bf53a38e725": {
     "tokens": {
       "36140": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1280,
@@ -1233,6 +1366,7 @@
   "0xf148438326e50ec1c703cb8fc946a6b5a7884e98": {
     "tokens": {
       "1870": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 700,
@@ -1255,6 +1389,7 @@
   "0x0974e6c435c18ddfbbc1f500ede24f99c3cf07f2": {
     "tokens": {
       "2608": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -1267,6 +1402,7 @@
   "0x7581f8e289f00591818f6c467939da7f9ab5a777": {
     "tokens": {
       "2291": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,
@@ -1279,6 +1415,7 @@
   "0xd2fdfb3aae284f9f7308c596aa2eb6dc8af599ee": {
     "tokens": {
       "1009": {
+        "thumb": true,
         "grid": true,
         "full": true,
         "width": 1600,

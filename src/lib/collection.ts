@@ -41,7 +41,7 @@ export type Group = {
   count: number;
 };
 
-type DerivedEntry = { accent?: string; tokens: Record<string, { grid: boolean; full: boolean; width?: number; height?: number; animated?: boolean; kind?: string }> };
+type DerivedEntry = { accent?: string; tokens: Record<string, { thumb?: boolean; grid: boolean; full: boolean; width?: number; height?: number; animated?: boolean; kind?: string }> };
 const manifest = derivedManifest as Record<string, DerivedEntry>;
 
 export const owner = data.owner;
@@ -72,8 +72,20 @@ export function media(col: Collection, t: Token) {
 export function hasImage(col: Collection, t: Token) {
   return !!media(col, t)?.grid;
 }
-export function derived(col: Collection, t: Token, size: 'grid' | 'full') {
+export function derived(col: Collection, t: Token, size: 'thumb' | 'grid' | 'full') {
   return asset(`derived/${col.contract.toLowerCase()}/${t.tokenId}-${size}.webp`);
+}
+
+/** Card art: 300px for small slots, 600px for retina and wide cards. */
+export function gridSrcset(col: Collection, t: Token) {
+  const has300 = media(col, t)?.thumb;
+  const grid = `${derived(col, t, 'grid')} 600w`;
+  return has300 ? `${derived(col, t, 'thumb')} 300w, ${grid}` : grid;
+}
+
+/** Token art: the 600px card copy is enough below ~600 CSS px. */
+export function fullSrcset(col: Collection, t: Token) {
+  return `${derived(col, t, 'grid')} 600w, ${derived(col, t, 'full')} 1600w`;
 }
 export function fullSize(col: Collection, t: Token) {
   const m = media(col, t);

@@ -3,7 +3,7 @@
 // so it renders in that brand's colors and fonts inside the Drakaris shell.
 import { useT, type Lang } from '../i18n/ui';
 import { href } from '../lib/site';
-import { derived, hasImage, tokenTitle, type Group } from '../lib/collection';
+import { derived, gridSrcset, hasImage, tokenTitle, type Group } from '../lib/collection';
 import { flagshipInfo } from '../content/flagships';
 
 interface Props {
@@ -20,7 +20,20 @@ const accentFallback = group.members[0]?.accent;
 
 <a class="group-card" href={href(lang, `collections/${group.slug}`)} data-theme={info?.theme} style={!info ? `--accent:${accentFallback}` : undefined}>
   <div class={`covers n${covers.length}`}>
-    {covers.map(({ col, token }) => <img src={derived(col, token, 'grid')} alt={tokenTitle(col, token)} width="600" height="600" loading="lazy" decoding="async" />)}
+    {
+      covers.map(({ col, token }) => (
+        <img
+          src={derived(col, token, 'grid')}
+          srcset={gridSrcset(col, token)}
+          sizes="(max-width: 600px) 45vw, 170px"
+          alt={tokenTitle(col, token)}
+          width="600"
+          height="600"
+          loading={(index ?? 9) < 6 ? 'eager' : 'lazy'}
+          decoding="async"
+        />
+      ))
+    }
   </div>
   <div class="body">
     {index !== undefined && <span class="idx mono">{String(index + 1).padStart(2, '0')}</span>}
