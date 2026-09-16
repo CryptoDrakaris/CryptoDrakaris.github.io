@@ -1,0 +1,168 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import { LANGS, useT, type Lang } from '../../i18n/ui';
+import { SOCIAL } from '../../lib/site';
+import { flagships } from '../../lib/collection';
+import { flagshipInfo } from '../../content/flagships';
+
+export const getStaticPaths = () => LANGS.map((lang) => ({ params: { lang } }));
+
+const lang = Astro.params.lang as Lang;
+const { t } = useT(lang);
+
+const mine = [
+  { icon: 'x', name: 'X', handle: SOCIAL.x.handle, url: SOCIAL.x.url, text: t('contact.x') },
+  { icon: 'tiktok', name: 'TikTok', handle: SOCIAL.tiktok.handle, url: SOCIAL.tiktok.url, text: t('contact.tiktok') },
+] as const;
+
+// Official community channels of the flagships
+const communities = flagships
+  .map((g) => ({ g, info: flagshipInfo(g.slug) }))
+  .filter((x) => x.info)
+  .map(({ g, info }) => ({
+    name: g.name,
+    theme: info!.theme,
+    links: (
+      [
+        ['discord', 'Discord', info!.links.discord],
+        ['x', 'X', info!.links.x],
+        ['globe', 'Website', info!.links.website],
+      ] as const
+    ).filter(([, , url]) => url),
+  }));
+const themes = communities.map((c) => c.theme);
+---
+
+<Base lang={lang} title={t('nav.contact')} extraThemes={themes}>
+  <div class="wrap">
+    <header class="page-head">
+      <span class="eyebrow">{t('contact.eyebrow')}</span>
+      <h1>{t('contact.title')}</h1>
+      <p class="lead">{t('contact.lead')}</p>
+    </header>
+
+    <div class="mine">
+      {
+        mine.map((m) => (
+          <a class="social" href={m.url} target="_blank" rel="noopener">
+            <span class="ico">
+              <Icon name={m.icon} size={28} />
+            </span>
+            <span class="eyebrow">{m.name}</span>
+            <span class="handle">{m.handle}</span>
+            <span class="text">{m.text}</span>
+            <span class="link-arrow">{m.url.replace('https://', '').replace('www.', '')}</span>
+          </a>
+        ))
+      }
+    </div>
+
+    <section class="communities">
+      <h2 class="eyebrow">{t('contact.communities')}</h2>
+      <ul>
+        {
+          communities.map((c) => (
+            <li data-theme={c.theme}>
+              <span class="cname">{c.name}</span>
+              <span class="links">
+                {c.links.map(([icon, label, url]) => (
+                  <a href={url} target="_blank" rel="noopener" aria-label={`${c.name} ${label}`}>
+                    <Icon name={icon} /> <span>{label}</span>
+                  </a>
+                ))}
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+  </div>
+  <div class="spacer"></div>
+</Base>
+
+<style>
+  .mine {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+    gap: 16px;
+  }
+  .social {
+    display: grid;
+    gap: 10px;
+    padding: clamp(24px, 4vw, 40px);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    text-decoration: none;
+    transition: border-color 0.2s;
+  }
+  .social:hover {
+    border-color: var(--accent);
+  }
+  .ico {
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .handle {
+    font-family: var(--font-display);
+    font-size: calc(clamp(1.6rem, 3.5vw, 2.4rem) * var(--display-scale));
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
+  }
+  .text {
+    color: var(--muted);
+  }
+  .communities {
+    margin-top: 56px;
+    display: grid;
+    gap: 16px;
+  }
+  .communities ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  }
+  .communities li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 12px 12px 12px 18px;
+    background: var(--bg);
+    color: var(--text);
+    border: max(1px, var(--border-w)) solid var(--outline, var(--line-strong));
+    box-shadow: var(--shadow);
+    border-radius: var(--radius);
+  }
+  .cname {
+    font-family: var(--font-display);
+    font-weight: var(--display-weight);
+    text-transform: var(--display-transform);
+    font-size: 1.1rem;
+  }
+  .links {
+    display: flex;
+    gap: 4px;
+  }
+  .links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 0 10px;
+    border-radius: var(--btn-radius);
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+  .links a:hover {
+    background: rgb(var(--accent-rgb) / 0.12);
+  }
+</style>

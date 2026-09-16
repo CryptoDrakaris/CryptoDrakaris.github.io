@@ -1,0 +1,303 @@
+---
+// Token page. Flagship tokens use the flagship theme; others use the Drakaris shell with the collection accent.
+import Base from '../../../../layouts/Base.astro';
+import Icon from '../../../../components/Icon.astro';
+import { LANGS, useT, type Lang } from '../../../../i18n/ui';
+import { href } from '../../../../lib/site';
+import {
+  collections,
+  derived,
+  hasImage,
+  fullSize,
+  originalUrl,
+  openseaUrl,
+  etherscanTokenUrl,
+  etherscanAddressUrl,
+  shortAddress,
+  shortId,
+  tokenTitle,
+  tokenPath,
+  type Collection,
+  type Token,
+} from '../../../../lib/collection';
+import { flagshipInfo } from '../../../../content/flagships';
+
+export const getStaticPaths = () =>
+  LANGS.flatMap((lang) =>
+    collections.flatMap((col) => col.tokens.map((token) => ({ params: { lang, collection: col.slug, id: token.tokenId }, props: { col, token } }))),
+  );
+
+const lang = Astro.params.lang as Lang;
+const { col, token } = Astro.props as { col: Collection; token: Token };
+const { t } = useT(lang);
+
+const group = col.group;
+const info = group.kind === 'flagship' ? flagshipInfo(group.slug) : undefined;
+const title = tokenTitle(col, token);
+// collections that name every token the same ("To Ethereum, with Love") need the id to stay unique
+const pageTitle = title.includes('#') ? title : `${title} #${shortId(token.tokenId)}`;
+const imaged = hasImage(col, token);
+const full = imaged ? derived(col, token, 'full') : null;
+const size = fullSize(col, token);
+// image rescued from an archive or a marketplace because the project's own host is gone
+const rescued = token.imageSource && token.imageSource !== 'original';
+// Link the original only when it was actually downloaded, so dead hosts get no broken link.
+// Rescue sources are hotlink-protected, so those open our own stored copy instead.
+const original = !token.originalFile ? null : rescued ? full : originalUrl(token);
+
+const backHref = group.kind === 'flagship' ? href(lang, `collections/${group.slug}`) + `#${col.slug}` : href(lang, 'collections/others') + `#${col.slug}`;
+const backName = group.kind === 'flagship' ? group.name : col.name;
+
+const idx = col.tokens.findIndex((x) => x.tokenId === token.tokenId);
+const prev = col.tokens[(idx - 1 + col.tokens.length) % col.tokens.length];
+const next = col.tokens[(idx + 1) % col.tokens.length];
+// Descriptions that just repeat the collection name add nothing
+const description = token.description && token.description.trim() !== col.name && token.description.length > 3 ? token.description : null;
+---
+
+<Base
+  lang={lang}
+  title={pageTitle}
+  description={description?.slice(0, 160)}
+  image={full ?? undefined}
+  theme={info?.theme ?? 'drakaris'}
+  accent={info ? undefined : col.accent}
+  brand={group.kind === 'flagship' ? group.name : undefined}
+>
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumbs">
+      <a class="back" href={backHref}>← {t('token.back', { name: backName })}</a>
+      {
+        col.tokens.length > 1 && (
+          <span class="pager">
+            <a href={href(lang, tokenPath(col, prev))} aria-label={`${t('token.prev')}: ${tokenTitle(col, prev)}`}>← #{shortId(prev.tokenId)}</a>
+            <a href={href(lang, tokenPath(col, next))} aria-label={`${t('token.next')}: ${tokenTitle(col, next)}`}>#{shortId(next.tokenId)} →</a>
+          </span>
+        )
+      }
+    </nav>
+
+    <div class="token">
+      {
+        full ? (
+          <a class="art" href={original ?? full} target="_blank" rel="noopener" title={t('token.original')}>
+            <img src={full} alt={title} width={size.width} height={size.height} fetchpriority="high" />
+          </a>
+        ) : (
+          <div class="art placeholder">
+            <span>{col.name}</span>
+            <p>{t('token.noPreview')}</p>
+          </div>
+        )
+      }
+
+      <div class="info">
+        <span class="eyebrow">{col.name}</span>
+        <h1 class:list={[{ long: title.length > 18 }]}>{title.startsWith(col.name + ' #') ? `#${shortId(token.tokenId)}` : title}</h1>
+
+        <div class="btn-row">
+          {original && <a class="btn btn--accent" href={original} target="_blank" rel="noopener"><Icon name="external" /> {t('token.original')}</a>}
+          <a class="btn" href={openseaUrl(col, token)} target="_blank" rel="noopener">{t('token.opensea')}</a>
+          <a class="btn" href={etherscanTokenUrl(col, token)} target="_blank" rel="noopener">{t('token.etherscan')}</a>
+        </div>
+
+        {
+          description && (
+            <section>
+              <h2 class="eyebrow">{t('token.about')}</h2>
+              <p class="desc">{description}</p>
+            </section>
+          )
+        }
+
+        {
+          token.attributes.length > 0 && (
+            <section>
+              <h2 class="eyebrow">{t('token.traits')}</h2>
+              <ul class="traits">
+                {token.attributes.map((a) => (
+                  <li>
+                    <span class="eyebrow">{a.trait_type}</span>
+                    <span class="val">{a.value}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+
+        <section>
+          <h2 class="eyebrow">{t('token.details')}</h2>
+          <dl class="details">
+            <div>
+              <dt>{t('token.collection')}</dt>
+              <dd><a href={backHref}>{col.name}</a></dd>
+            </div>
+            <div>
+              <dt>{t('token.contract')}</dt>
+              <dd class="mono"><a href={etherscanAddressUrl(col.contract)} target="_blank" rel="noopener">{shortAddress(col.contract)}</a></dd>
+            </div>
+            <div><dt>{t('token.tokenId')}</dt><dd class="mono id">{token.tokenId}</dd></div>
+            <div><dt>{t('token.standard')}</dt><dd class="mono">{col.standard.toUpperCase()}</dd></div>
+            {
+              rescued && (
+                <div>
+                  <dt>{t('token.source')}</dt>
+                  <dd>{t(`token.source.${token.imageSource}` as 'token.source.archive')}</dd>
+                </div>
+              )
+            }
+          </dl>
+          {rescued && <p class="note">{t('token.sourceNote')}</p>}
+        </section>
+      </div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+</Base>
+
+<style>
+  .crumbs {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    padding-block: 24px;
+  }
+  .crumbs a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.92rem;
+  }
+  .crumbs a:hover {
+    color: var(--accent);
+  }
+  .pager {
+    display: flex;
+    gap: 18px;
+    font-family: var(--font-mono);
+  }
+  .token {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: clamp(28px, 5vw, 64px);
+    align-items: start;
+  }
+  .art {
+    display: block;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--line-strong);
+    position: sticky;
+    top: 90px;
+    cursor: zoom-in;
+    background: var(--bg-2);
+  }
+  .placeholder {
+    cursor: default;
+    aspect-ratio: 1;
+    display: grid;
+    place-content: center;
+    gap: 12px;
+    padding: 24px;
+    text-align: center;
+    background: radial-gradient(circle at 30% 20%, rgb(var(--accent-rgb) / 0.3), transparent 70%), var(--bg-2);
+  }
+  .placeholder span {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.6rem;
+  }
+  .placeholder p {
+    color: var(--muted);
+    max-width: 32ch;
+  }
+  .info {
+    display: grid;
+    gap: 28px;
+    min-width: 0;
+  }
+  .info > .eyebrow {
+    margin-bottom: -20px;
+  }
+  h1 {
+    font-size: calc(clamp(3rem, 8vw, 5.5rem) * var(--display-scale));
+    overflow-wrap: anywhere;
+  }
+  h1.long {
+    font-size: calc(clamp(2rem, 4.5vw, 3.2rem) * var(--display-scale));
+  }
+  section {
+    display: grid;
+    gap: 12px;
+  }
+  .desc {
+    color: var(--muted);
+    white-space: pre-line;
+  }
+  .traits {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr));
+    gap: 8px;
+  }
+  .traits li {
+    display: grid;
+    gap: 4px;
+    padding: 12px 14px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+  .val {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+  .details {
+    margin: 0;
+    display: grid;
+    border-top: 1px solid var(--line);
+  }
+  .details div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  dt {
+    color: var(--muted);
+    flex: none;
+  }
+  dd {
+    margin: 0;
+    text-align: right;
+    min-width: 0;
+  }
+  dd.id {
+    overflow-wrap: anywhere;
+  }
+  dd a {
+    color: var(--accent);
+  }
+  .note {
+    color: var(--dim);
+    font-size: 0.88rem;
+    border-left: 2px solid var(--line-strong);
+    padding-left: 12px;
+  }
+  @media (max-width: 860px) {
+    .token {
+      grid-template-columns: 1fr;
+    }
+    .art {
+      position: static;
+    }
+  }
+</style>

@@ -1,0 +1,84 @@
+---
+import { useT, type Lang } from '../i18n/ui';
+import { SOCIAL } from '../lib/site';
+import Icon from './Icon.astro';
+
+type Links = { website?: string; x?: string; discord?: string; instagram?: string; youtube?: string };
+
+interface Props {
+  lang: Lang;
+  /** When set, the band promotes this project's official channels next to the owner's links */
+  project?: { name: string; links: Links };
+}
+const { lang, project } = Astro.props;
+const { t } = useT(lang);
+
+const LABELS = { website: 'Website', x: 'X', discord: 'Discord', instagram: 'Instagram', youtube: 'YouTube' } as const;
+const ICONS = { website: 'globe', x: 'x', discord: 'discord', instagram: 'instagram', youtube: 'youtube' } as const;
+const official = project ? (Object.entries(project.links) as [keyof Links, string][]).filter(([, url]) => url) : [];
+---
+
+<section class="section join">
+  <div class="wrap inner">
+    <div class="copy">
+      <span class="eyebrow">{t('join.eyebrow')}</span>
+      <h2>{project ? t('flagship.community.title', { name: project.name }) : t('join.title')}</h2>
+      <p class="lead">{t('join.lead')}</p>
+    </div>
+    <div class="groups">
+      <div class="group">
+        <span class="eyebrow">Drakaris</span>
+        <div class="btn-row">
+          <a class="btn btn--accent" href={SOCIAL.x.url} target="_blank" rel="noopener"><Icon name="x" /> {SOCIAL.x.handle}</a>
+          <a class="btn" href={SOCIAL.tiktok.url} target="_blank" rel="noopener"><Icon name="tiktok" /> TikTok</a>
+        </div>
+      </div>
+      {
+        official.length > 0 && (
+          <div class="group">
+            <span class="eyebrow">{project!.name} · {t('flagship.official')}</span>
+            <div class="btn-row">
+              {official.map(([k, url]) => (
+                <a class="btn" href={url} target="_blank" rel="noopener">
+                  <Icon name={ICONS[k]} /> {LABELS[k]}
+                </a>
+              ))}
+            </div>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .join {
+    background: var(--glow), var(--bg);
+  }
+  .inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+  .copy {
+    display: grid;
+    gap: 16px;
+  }
+  h2 {
+    font-size: calc(clamp(2.2rem, 5vw, 3.6rem) * var(--display-scale));
+  }
+  .groups {
+    display: grid;
+    gap: 28px;
+  }
+  .group {
+    display: grid;
+    gap: 12px;
+  }
+  @media (max-width: 860px) {
+    .inner {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

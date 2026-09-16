@@ -1,0 +1,67 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { useT, type Lang } from '../i18n/ui';
+import { href } from '../lib/site';
+import { formatDate, postSlug } from '../lib/blog';
+
+interface Props {
+  lang: Lang;
+  posts: CollectionEntry<'blog'>[];
+  /** 2 on the blog index (where the page h1 is the section title), 3 under a section h2 */
+  level?: 2 | 3;
+}
+const { lang, posts, level = 3 } = Astro.props;
+const { t } = useT(lang);
+const H = `h${level}` as 'h2' | 'h3';
+---
+
+{posts.length === 0 && <p class="lead">{t('blog.empty')}</p>}
+<ul class="posts">
+  {
+    posts.map((p) => (
+      <li>
+        <a href={href(lang, `blog/${postSlug(p.id)}`)}>
+          <time class="eyebrow" datetime={p.data.date.toISOString()}>
+            {formatDate(lang, p.data.date)}
+          </time>
+          <H>{p.data.title}</H>
+          <p>{p.data.description}</p>
+          <span class="link-arrow">{t('blog.read')}</span>
+        </a>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .posts {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  }
+  .posts a {
+    display: grid;
+    gap: 12px;
+    height: 100%;
+    align-content: start;
+    text-decoration: none;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 24px;
+    transition: border-color 0.2s;
+  }
+  .posts a:hover {
+    border-color: var(--accent);
+  }
+  h2,
+  h3 {
+    font-size: calc(1.35rem * var(--display-scale));
+  }
+  p {
+    color: var(--muted);
+  }
+</style>
