@@ -1,17 +1,19 @@
 #!/usr/bin/env node
 // Static web design audit over built HTML + CSS. No dependencies, Node 18+.
-// Usage: node audit-static.mjs <build-dir> [--css extra.css ...] [--json]
+// Usage: node audit-static.mjs <build-dir> [--css extra.css ...] [--json] [--no-taste]
 // Heuristic regex parsing: confirm CRITICAL/HIGH findings against source before reporting.
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { tasteChecks } from './taste-checks.mjs';
 
 const args = process.argv.slice(2);
 const json = args.includes('--json');
+const noTaste = args.includes('--no-taste');
 const extraCss = [];
 let root = null;
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--css') extraCss.push(args[++i]);
-  else if (args[i] !== '--json') root = args[i];
+  else if (!args[i].startsWith('--')) root = args[i];
 }
 if (!root) {
   console.error('Usage: node audit-static.mjs <build-dir> [--css file.css] [--json]');
@@ -196,6 +198,9 @@ for (const file of htmlFiles) {
     if (!/display=(swap|optional|fallback)/.test(m[1])) add('font-loading', 'MEDIUM', 'Google Fonts без display=swap', page);
   if (/fonts\.googleapis\.com/.test(html) && !/rel\s*=\s*["']preconnect["'][^>]*fonts\.gstatic\.com|fonts\.gstatic\.com[^>]*rel\s*=\s*["']preconnect/i.test(html))
     add('font-loading', 'LOW', 'Нет preconnect к fonts.gstatic.com', page);
+
+  // section 11: taste heuristics (never above MEDIUM)
+  if (!noTaste) tasteChecks(html, page, add);
 }
 
 for (const [k, pages] of titles) if (pages.length > 1) for (const p of pages) add('meta-title', 'MEDIUM', 'Title повторяется на нескольких страницах одного языка', p, k.split('|').slice(1).join('|'));
