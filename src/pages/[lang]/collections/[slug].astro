@@ -1,0 +1,248 @@
+---
+// Flagship landing page, rendered in the flagship's own theme.
+import Base from '../../../layouts/Base.astro';
+import NftCard from '../../../components/NftCard.astro';
+import JoinBand from '../../../components/JoinBand.astro';
+import { LANGS, useT, type Lang } from '../../../i18n/ui';
+import { href } from '../../../lib/site';
+import { flagships, derived, hasImage, tokenTitle, tokenPath, type Group } from '../../../lib/collection';
+import { flagshipInfo } from '../../../content/flagships';
+
+export const getStaticPaths = () => LANGS.flatMap((lang) => flagships.map((group) => ({ params: { lang, slug: group.slug }, props: { group } })));
+
+const lang = Astro.params.lang as Lang;
+const { group } = Astro.props as { group: Group };
+const { t, tn, nf } = useT(lang);
+const info = flagshipInfo(group.slug);
+const copy = info?.copy[lang];
+
+const imaged = group.members.flatMap((col) => col.tokens.filter((tok) => hasImage(col, tok)).map((token) => ({ col, token })));
+const mosaic = imaged.slice(0, 6);
+const og = imaged[0] ? derived(imaged[0].col, imaged[0].token, 'full') : undefined;
+const website = info?.links.website;
+---
+
+<Base
+  lang={lang}
+  title={group.name}
+  description={copy?.about}
+  image={og}
+  theme={info?.theme ?? 'drakaris'}
+  accent={info ? undefined : group.members[0]?.accent}
+  brand={group.name}
+>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">{t('flagship.eyebrow')}</span>
+        <h1 class="display-xl">
+          {
+            copy ? (
+              <>
+                <span>{tn(copy.heroCount, group.count)}</span>
+                <span class="accent">{copy.heroLine}</span>
+              </>
+            ) : (
+              <span>{group.name}</span>
+            )
+          }
+        </h1>
+        {copy && <p class="lead">{copy.lead}</p>}
+        <div class="btn-row">
+          <a class="btn btn--accent" href="#mine">{t('flagship.cta.gallery')}</a>
+          {website && <a class="btn" href={website} target="_blank" rel="noopener">{new URL(website).hostname.replace('www.', '')}</a>}
+        </div>
+      </div>
+
+      <div class={`mosaic n${mosaic.length}`} aria-hidden="true">
+        {
+          mosaic.map(({ col, token }, i) => (
+            <a href={href(lang, tokenPath(col, token))} tabindex="-1" class={`tile tile-${i}`}>
+              <img src={derived(col, token, 'grid')} alt={tokenTitle(col, token)} width="600" height="600" loading={i < 3 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : undefined} />
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <dl class="stats">
+      <div><dt class="eyebrow">{t('flagship.mine')}</dt><dd>{nf.format(group.count)}</dd></div>
+      {info?.supply && <div><dt class="eyebrow">{t('flagship.supply')}</dt><dd>{nf.format(info.supply)}</dd></div>}
+      {info?.launched && <div><dt class="eyebrow">{t('flagship.since')}</dt><dd>{info.launched}</dd></div>}
+      {info?.creator && <div><dt class="eyebrow">{t('flagship.creator')}</dt><dd class="small">{info.creator}</dd></div>}
+    </dl>
+  </div>
+
+  {
+    copy && copy.why.length > 0 && (
+      <section class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <span class="eyebrow">{group.name}</span>
+            <h2>{copy.whyTitle}</h2>
+            <p class="lead">{copy.about}</p>
+          </div>
+          <div class="grid-3">
+            {copy.why.map((w, i) => (
+              <article class="card why">
+                <span class="num mono">0{i + 1}</span>
+                <h3>{w.title}</h3>
+                <p>{w.text}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="section" id="mine">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">{t('flagship.mine')}</span>
+        <h2>{t('flagship.gallery', { name: group.name })}</h2>
+      </div>
+      {
+        group.members.map((col) => (
+          <div class="member" id={col.slug}>
+            {group.members.length > 1 && (
+              <h3 class="member-title">
+                {col.name} <span class="mono">{col.tokens.length}</span>
+              </h3>
+            )}
+            <div class="nft-grid">
+              {col.tokens.map((token, i) => (
+                <NftCard lang={lang} col={col} token={token} eager={i < 4 && group.members.indexOf(col) === 0} showCollection={false} />
+              ))}
+            </div>
+          </div>
+        ))
+      }
+      <p class="disclaimer">{t('flagship.disclaimer', { name: group.name })}</p>
+    </div>
+  </section>
+
+  <JoinBand lang={lang} project={info ? { name: group.name, links: info.links } : undefined} />
+</Base>
+
+<style>
+  .hero {
+    overflow: hidden;
+    background: var(--glow), var(--bg);
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: clamp(32px, 5vw, 72px);
+    align-items: center;
+    min-height: min(calc(100svh - 66px), 820px);
+    padding-block: clamp(48px, 8vw, 96px);
+  }
+  .hero-copy {
+    display: grid;
+    gap: 24px;
+  }
+  h1 span {
+    display: block;
+  }
+  .mosaic {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    transform: rotate(-3deg);
+  }
+  .mosaic.n1,
+  .mosaic.n2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .tile {
+    display: block;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--line-strong);
+    aspect-ratio: 1;
+  }
+  .tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .n6 .tile-1,
+  .n6 .tile-4 {
+    transform: translateY(28px);
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+    gap: 1px;
+    margin: 0 0 clamp(48px, 8vw, 80px);
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .stats div {
+    background: var(--card);
+    padding: 18px 20px;
+    display: grid;
+    gap: 6px;
+  }
+  dd {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+  }
+  dd.small {
+    font-size: 1.1rem;
+  }
+  .why {
+    display: grid;
+    gap: 12px;
+    align-content: start;
+  }
+  .why h3 {
+    font-size: calc(1.4rem * var(--display-scale));
+  }
+  .why p {
+    color: var(--muted);
+  }
+  .num {
+    color: var(--accent);
+    font-size: 0.8rem;
+  }
+  .member + .member {
+    margin-top: 48px;
+  }
+  .member-title {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-size: calc(1.5rem * var(--display-scale));
+    margin-bottom: 16px;
+  }
+  .member-title .mono {
+    font-size: 0.9rem;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .disclaimer {
+    margin-top: 48px;
+    color: var(--dim);
+    font-size: 0.9rem;
+    border-left: 2px solid var(--line-strong);
+    padding-left: 14px;
+  }
+  @media (max-width: 900px) {
+    .hero-grid {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+    .mosaic {
+      transform: none;
+      margin-bottom: 28px;
+    }
+  }
+</style>

@@ -1,0 +1,19 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# deps & build
+node_modules/
+dist/
+.astro/
+
+# original NFT files are large; the site uses public/derived
+data/originals/
+data/*.log
+data/meta-cache/
+data/broken.json
+
+# os
+.DS_Store
+Thumbs.db

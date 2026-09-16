@@ -1,0 +1,90 @@
+---
+// Flagship teaser card. The card carries the flagship's own data-theme,
+// so it renders in that brand's colors and fonts inside the Drakaris shell.
+import { useT, type Lang } from '../i18n/ui';
+import { href } from '../lib/site';
+import { derived, hasImage, tokenTitle, type Group } from '../lib/collection';
+import { flagshipInfo } from '../content/flagships';
+
+interface Props {
+  lang: Lang;
+  group: Group;
+  index?: number;
+}
+const { lang, group, index } = Astro.props;
+const { t, tn } = useT(lang);
+const info = flagshipInfo(group.slug);
+const covers = group.members.flatMap((col) => col.tokens.filter((tok) => hasImage(col, tok)).map((token) => ({ col, token }))).slice(0, 4);
+const accentFallback = group.members[0]?.accent;
+---
+
+<a class="group-card" href={href(lang, `collections/${group.slug}`)} data-theme={info?.theme} style={!info ? `--accent:${accentFallback}` : undefined}>
+  <div class={`covers n${covers.length}`}>
+    {covers.map(({ col, token }) => <img src={derived(col, token, 'grid')} alt={tokenTitle(col, token)} width="600" height="600" loading="lazy" decoding="async" />)}
+  </div>
+  <div class="body">
+    {index !== undefined && <span class="idx mono">{String(index + 1).padStart(2, '0')}</span>}
+    <h3>{group.name}</h3>
+    <p class="count">{tn('nfts', group.count)}{group.members.length > 1 && ` · ${tn('collectionsN', group.members.length)}`}</p>
+    <span class="link-arrow">{t('collections.open')}</span>
+  </div>
+</a>
+
+<style>
+  .group-card {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    text-decoration: none;
+    color: var(--text);
+    background: var(--bg);
+    border: max(1px, var(--border-w)) solid var(--outline, var(--line-strong));
+    box-shadow: var(--shadow);
+    border-radius: var(--radius);
+    overflow: hidden;
+    font-family: var(--font-sans);
+    transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+  }
+  .group-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--outline, var(--accent));
+    box-shadow: var(--shadow-hover);
+  }
+  .covers {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    aspect-ratio: 1;
+    background: var(--bg-2);
+  }
+  .covers.n1 {
+    grid-template-columns: 1fr;
+  }
+  .covers.n3 img:first-child {
+    grid-row: span 2;
+  }
+  .covers img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .body {
+    position: relative;
+    display: grid;
+    gap: 6px;
+    align-content: start;
+    padding: 18px 20px 20px;
+    background: var(--glow), var(--bg);
+  }
+  .idx {
+    color: var(--accent);
+    font-size: 0.75rem;
+  }
+  h3 {
+    font-size: calc(1.6rem * var(--display-scale));
+    line-height: 1.1;
+  }
+  .count {
+    color: var(--muted);
+    font-size: 0.92rem;
+    margin-bottom: 6px;
+  }
+</style>

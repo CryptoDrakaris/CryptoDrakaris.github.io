@@ -1,0 +1,71 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { LANGS, useT, type Lang } from '../i18n/ui';
+import { fontsHref, type ThemeKey } from '../lib/themes';
+
+interface Props {
+  lang: Lang;
+  title?: string;
+  description?: string;
+  image?: string;
+  theme?: ThemeKey;
+  /** Section name shown next to the logo, e.g. "Lazy Lions" */
+  brand?: string;
+  /** Per-collection accent override for pages in the Drakaris shell */
+  accent?: string;
+  /** Also load fonts of these themes (pages that show themed flagship cards) */
+  extraThemes?: ThemeKey[];
+}
+
+const { lang, title, description, image, theme = 'drakaris', brand, accent, extraThemes = [] } = Astro.props;
+const { t } = useT(lang);
+const siteName = 'Drakaris';
+const fullTitle = title ? `${title} · ${siteName}` : `${siteName} – ${t('meta.tagline')}`;
+const desc = description ?? t('meta.description');
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const rest = Astro.url.pathname.replace(new RegExp(`^${base}/${lang}`), '');
+const abs = (p: string) => new URL(p, Astro.site ?? Astro.url).href;
+const style = accent ? `--accent:${accent};--accent-soft:color-mix(in srgb, ${accent} 70%, white);--accent-rgb:${hexRgb(accent)}` : undefined;
+
+function hexRgb(h: string) {
+  const n = parseInt(h.replace('#', ''), 16);
+  return `${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255}`;
+}
+---
+
+<!doctype html>
+<html lang={lang} data-theme={theme} style={style}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={desc} />
+    <meta name="theme-color" content="#0b0b0d" />
+    <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.svg`} type="image/svg+xml" />
+    {Astro.site && <link rel="canonical" href={abs(Astro.url.pathname)} />}
+    {LANGS.map((l) => <link rel="alternate" hreflang={l} href={abs(`${base}/${l}${rest}`)} />)}
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={desc} />
+    {image && <meta property="og:image" content={abs(image)} />}
+    <meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:creator" content="@cryptodrakaris" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href={fontsHref(theme, extraThemes)} />
+  </head>
+  <body>
+    <a class="skip" href="#main">{t('nav.skip')}</a>
+    <Header lang={lang} brand={brand} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+  </body>
+</html>

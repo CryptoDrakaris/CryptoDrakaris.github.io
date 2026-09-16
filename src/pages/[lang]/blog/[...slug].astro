@@ -1,0 +1,53 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import JoinBand from '../../../components/JoinBand.astro';
+import { LANGS, useT, type Lang } from '../../../i18n/ui';
+import { href } from '../../../lib/site';
+import { postsFor, postSlug, formatDate } from '../../../lib/blog';
+
+export async function getStaticPaths() {
+  const paths = [];
+  for (const lang of LANGS) {
+    for (const post of await postsFor(lang)) {
+      paths.push({ params: { lang, slug: postSlug(post.id) }, props: { post } });
+    }
+  }
+  return paths;
+}
+
+const lang = Astro.params.lang as Lang;
+const { post } = Astro.props as { post: CollectionEntry<'blog'> };
+const { t } = useT(lang);
+const { Content } = await render(post);
+---
+
+<Base lang={lang} title={post.data.title} description={post.data.description}>
+  <article class="wrap">
+    <header class="page-head">
+      <a class="back" href={href(lang, 'blog')}>← {t('blog.back')}</a>
+      <time class="eyebrow" datetime={post.data.date.toISOString()}>{formatDate(lang, post.data.date)}</time>
+      <h1>{post.data.title}</h1>
+      <p class="lead">{post.data.description}</p>
+    </header>
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+  <div style="height: clamp(48px, 8vw, 96px)"></div>
+  <JoinBand lang={lang} />
+</Base>
+
+<style>
+  .back {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+  .back:hover {
+    color: var(--accent);
+  }
+  h1 {
+    max-width: 22ch;
+  }
+</style>
