@@ -36,7 +36,6 @@ const accentFallback = group.members[0]?.accent;
     }
   </div>
   <div class="body">
-    {index !== undefined && <span class="idx mono">{String(index + 1).padStart(2, '0')}</span>}
     <h3>{group.name}</h3>
     <p class="count">{tn('nfts', group.count)}{group.members.length > 1 && ` · ${tn('collectionsN', group.members.length)}`}</p>
     <span class="link-arrow">{t('collections.open')}</span>
@@ -86,10 +85,6 @@ const accentFallback = group.members[0]?.accent;
     align-content: start;
     padding: 18px 20px 20px;
     background: var(--glow), var(--bg);
-  }
-  .idx {
-    color: var(--accent);
-    font-size: 0.75rem;
   }
   h3 {
     font-size: calc(1.6rem * var(--display-scale));

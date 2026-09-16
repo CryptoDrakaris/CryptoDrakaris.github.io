@@ -30,9 +30,9 @@
   --accent-rgb: 255 106 61;
   --header-bg: rgb(11 11 13 / 0.84);
 
-  --font-display: 'Unbounded', 'Onest', system-ui, sans-serif;
-  --font-sans: 'Onest', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-display: 'Unbounded Variable', 'Onest Variable', system-ui, sans-serif;
+  --font-sans: 'Onest Variable', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
   --display-weight: 700;
   --display-tracking: -0.03em;
   --display-leading: 1.02;
@@ -59,9 +59,9 @@
   --accent-rgb: 201 151 69;
   --header-bg: rgb(8 10 12 / 0.84);
 
-  --font-display: 'Space Grotesk', 'Onest', system-ui, sans-serif;
-  --font-sans: 'Space Grotesk', 'Onest', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-display: 'Space Grotesk Variable', 'Onest Variable', system-ui, sans-serif;
+  --font-sans: 'Space Grotesk Variable', 'Onest Variable', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
   --display-weight: 700;
   --display-tracking: -0.035em;
   --display-leading: 0.98;
@@ -73,8 +73,8 @@
 /* Space Grotesk has no Cyrillic: whole-page Onest on RU/KK so lines never mix faces */
 [data-theme='lazy-lions']:lang(ru),
 [data-theme='lazy-lions']:lang(kk) {
-  --font-sans: 'Onest', system-ui, sans-serif;
-  --font-display: 'Onest', system-ui, sans-serif;
+  --font-sans: 'Onest Variable', system-ui, sans-serif;
+  --font-display: 'Onest Variable', system-ui, sans-serif;
 }
 
 /* Brand fonts that are commercial or lack Cyrillic are replaced by the closest
@@ -97,9 +97,9 @@
   --accent-rgb: 2 114 1;
   --header-bg: rgb(214 241 241 / 0.9);
 
-  --font-display: 'Exo 2', 'Montserrat', system-ui, sans-serif; /* for self-hosted "Space" */
-  --font-sans: 'Montserrat', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-display: 'Exo 2 Variable', 'Montserrat Variable', system-ui, sans-serif; /* for self-hosted "Space" */
+  --font-sans: 'Montserrat Variable', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
   --display-weight: 800;
   --display-tracking: -0.02em;
   --display-leading: 1;
@@ -132,8 +132,8 @@
   --accent-rgb: 46 32 118;
   --header-bg: rgb(253 156 220 / 0.92);
 
-  --font-display: 'Nunito', system-ui, sans-serif; /* for Adobe akagi-pro */
-  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-display: 'Nunito Variable', system-ui, sans-serif; /* for Adobe akagi-pro */
+  --font-sans: 'IBM Plex Sans Variable', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
   --display-weight: 900;
   --display-tracking: -0.01em;
@@ -168,7 +168,7 @@
   --accent-rgb: 235 13 24;
   --header-bg: rgb(250 250 250 / 0.92);
 
-  --font-display: 'Rubik', system-ui, sans-serif; /* for Right Grotesk Spatial Black */
+  --font-display: 'Rubik Variable', system-ui, sans-serif; /* for Right Grotesk Spatial Black */
   --font-sans: 'IBM Plex Mono', ui-monospace, monospace; /* for Space Mono */
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
   --display-weight: 900;
@@ -203,9 +203,9 @@
   --accent-rgb: 255 197 51;
   --header-bg: rgb(10 10 10 / 0.88);
 
-  --font-display: 'Anton', 'Oswald', system-ui, sans-serif;
-  --font-sans: 'Space Grotesk', 'Onest', system-ui, sans-serif;
-  --font-mono: 'Space Mono', 'JetBrains Mono', ui-monospace, monospace;
+  --font-display: 'Anton', 'Oswald Variable', system-ui, sans-serif;
+  --font-sans: 'Space Grotesk Variable', 'Onest Variable', system-ui, sans-serif;
+  --font-mono: 'Space Mono', 'JetBrains Mono Variable', ui-monospace, monospace;
   --display-weight: 400;
   --display-tracking: 0.01em;
   --display-leading: 0.95;
@@ -219,9 +219,9 @@
 /* Anton, Space Grotesk, Space Mono have no Cyrillic */
 [data-theme='nonconformist-ducks']:lang(ru),
 [data-theme='nonconformist-ducks']:lang(kk) {
-  --font-display: 'Oswald', system-ui, sans-serif;
-  --font-sans: 'Onest', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-display: 'Oswald Variable', system-ui, sans-serif;
+  --font-sans: 'Onest Variable', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
   --display-weight: 700;
   --display-scale: 1;
 }
@@ -243,9 +243,9 @@
   --accent-rgb: 236 34 39;
   --header-bg: rgb(255 255 255 / 0.94);
 
-  --font-display: 'Open Sans', system-ui, sans-serif; /* Open Sans Condensed 700 via wdth axis */
-  --font-sans: 'Montserrat', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-display: 'Open Sans Variable', system-ui, sans-serif; /* Open Sans Condensed 700 via wdth axis */
+  --font-sans: 'Montserrat Variable', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
   --display-weight: 800;
   --display-tracking: -0.01em;
   --display-leading: 0.92;
@@ -282,9 +282,9 @@
   --accent-rgb: 255 50 0;
   --header-bg: rgb(0 0 0 / 0.84);
 
-  --font-display: 'Sora', 'Onest', system-ui, sans-serif;
-  --font-sans: 'Sora', 'Onest', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-display: 'Sora Variable', 'Onest Variable', system-ui, sans-serif;
+  --font-sans: 'Sora Variable', 'Onest Variable', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
   --display-weight: 700;
   --display-tracking: -0.02em;
   --display-leading: 1.02;
@@ -299,6 +299,6 @@
 /* Sora ships latin only */
 [data-theme='mars-cats-voyage']:lang(ru),
 [data-theme='mars-cats-voyage']:lang(kk) {
-  --font-display: 'Onest', system-ui, sans-serif;
-  --font-sans: 'Onest', system-ui, sans-serif;
+  --font-display: 'Onest Variable', system-ui, sans-serif;
+  --font-sans: 'Onest Variable', system-ui, sans-serif;
 }

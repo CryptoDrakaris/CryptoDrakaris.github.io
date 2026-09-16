@@ -31,10 +31,9 @@ const communities = flagships
       ] as const
     ).filter(([, , url]) => url),
   }));
-const themes = communities.map((c) => c.theme);
 ---
 
-<Base lang={lang} title={t('nav.contact')} extraThemes={themes}>
+<Base lang={lang} title={t('nav.contact')}>
   <div class="wrap">
     <header class="page-head">
       <span class="eyebrow">{t('contact.eyebrow')}</span>
