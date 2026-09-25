@@ -70,6 +70,7 @@
 npm install          # зависимости проекта
 npm run fetch        # собрать токены и оригиналы в data/ (лог: node scripts/fetch-collection.mjs > data/fetch.log)
 npm run derive       # webp-копии в public/derived/ + акцентные цвета в data/derived.json
+npm run archive      # личный архив: оригиналы со всех сетей на диск (--dry, --chain <id>)
 npm run dev          # локально: http://localhost:4321
 npm run build        # сборка в dist/
 ```
@@ -78,13 +79,18 @@ npm run build        # сборка в dist/
 
 ```
 scripts/
-  config.mjs              # владелец, RPC, индексатор, IPFS-шлюзы, FLAGSHIPS, HIDDEN, METADATA_SERVICES
+  config.mjs              # владелец, RPC, индексатор, IPFS-шлюзы, FLAGSHIPS, HIDDEN, METADATA_SERVICES,
+                          # CHAINS, ARCHIVE_ALLOW/DENY, BITCOIN
+  lib/media.mjs           # общее для обоих сборщиков: ipfs://, скачивание, определение типа файла
   fetch-collection.mjs    # задача 1: поиск токенов, проверка владения, метаданные, оригиналы
+  archive-collection.mjs  # задача 1б: личный архив по всем сетям, фильтр спама
   derive-images.mjs       # webp 600px (статичный первый кадр) и 1600px + акцент коллекции
 data/
   collection.json         # группы → коллекции → токены, в репозитории
   derived.json            # какие превью есть, размеры, акцентные цвета, в репозитории
-  originals/<contract>/   # оригиналы, в .gitignore, не трогать
+  originals/<contract>/   # оригиналы Ethereum, в .gitignore, не трогать
+  originals/<chain>/<contract>/  # оригиналы остальных сетей, тоже в .gitignore
+  archive.json            # опись личного архива, в репозитории
 public/derived/<contract>/<tokenId>-{grid,full}.webp
 src/
   i18n/ui.ts              # строки оболочки на трёх языках + plural
@@ -110,15 +116,48 @@ src/
   - on-chain SVG из `image_data`;
   - тип файла определяется по содержимому, а не по заголовку сервера (NonconformistDucks отдают PNG как JPEG);
   - поддоменные IPFS-шлюзы (`<cid>.ipfs.nftstorage.link`) переписываются на общий список шлюзов.
-- **Мёртвые серверы проектов** (StreetDawgs, DaVinci by AML, 3D Kings / Lazy Butts, ENS-имя): оригиналов нет, токены показываются с заглушкой.
+- **Мёртвые серверы проектов** (StreetDawgs, DaVinci by AML, 3D Kings / Lazy Butts, ENS-имя): оригиналов нет, токены показываются с заглушкой. Проверено 2026-09-25: сервер DaVinci отдаёт 404 на все пять картинок, домен StreetDawgs не отвечает вовсе.
 - **Спасение картинок.** Если сервер проекта мёртв безвозвратно, источник прописывается в `IMAGE_OVERRIDES` (`scripts/config.mjs`), файл скачивается один раз и хранится у нас. В `imageSource` пишется происхождение: `original`, `archive` (веб-архив), `marketplace` (копия с маркетплейса, пережата). На странице токена источник показывается явно, чтобы пережатая копия не выдавалась за оригинал. Хотлинк запрещён: у таких CDN стоит проверка Referer.
   - Crypto Cannabis Club: оригиналы существовали только на сервере проекта (в контракте на IPFS лежит лишь заглушка «Secret: Hidden», `baseURI` с 2021-08-06 указывал на их API). #1636 взят из Wayback Machine, #2086, #5211, #9624 – копии с Blur, все 4096×4096.
-- **IPFS.** Публичные шлюзы ограничивают частоту (429), `ipfs.io` и `dweb.link` отдают Cloudflare-челлендж. Отдельно проверено: CID картинок Lazy Scenes больше никто не хранит (`delegated-ipfs.dev` показывает ноль провайдеров), вернуть файлы оттуда нельзя.
+- **IPFS.** Публичные шлюзы ограничивают частоту (429), `ipfs.io`, `dweb.link` и pinata временами отдают 403. Отдельно проверено: CID картинок Lazy Scenes больше никто не хранит (`delegated-ipfs.dev` показывает ноль провайдеров), вернуть файлы оттуда нельзя.
+  - Перед тем как считать картинку потерянной, нужно проверить провайдеров через `delegated-ipfs.dev/routing/v1/providers/<cid>` и попробовать другие шлюзы: 2026-09-25 так нашлись живые `ipfs.filebase.io` и `ipfs.raribleuserdata.com` (стоят первыми в `IPFS_GATEWAYS`), и благодаря им вернулись картинки **Rabbitars #3677 и #6317** – файлы были на месте, отказывали только шлюзы.
 - **Lazy Scenes:** метаданные – с живого `metadata.lazylionsnft.com` (`METADATA_SERVICES`), картинки – PNG 3000×4600 с Blur (`marketplace`). Данные индексатора по этой коллекции устарели: они с этапа до раскрытия, где у всех токенов один `0.mp4`.
 - **Lazy Butts:** инфраструктура 3D Kings мертва, S3-бакет закрыт. Картинки – AVIF 1600×1600 с Element (`marketplace`), метаданные – из индексатора.
 - **Запасной путь через curl.** CDN Element отвергает соединения Node (проверяет отпечаток TLS) и принимает заголовок только в каноническом написании `User-Agent`, а не `user-agent`. Поэтому `fetchWithFallback` в крайнем случае вызывает `curl` (`curlGet`), передавая user-agent ключом `-A`.
 - **Определение типа файла:** AVIF и HEIC имеют тот же заголовок `ftyp`, что и mp4, поэтому тип уточняется по «бренду» внутри заголовка, иначе картинка сохранялась бы как видео и выпадала из превью.
 - Скрипт идемпотентный: повтор докачивает недостающее. После новых покупок: `npm run fetch && npm run derive && npm run build`.
+
+## Задача 1б. Личный архив по всем сетям
+
+`npm run archive` (`scripts/archive-collection.mjs`) – отдельная задача от сайта: собрать оригиналы всех NFT кошелька со всех сетей **на диск**, ничего не публикуя. Скрипт не трогает `data/collection.json`, сайт о нём не знает.
+
+- Сети в `CHAINS` (`scripts/config.mjs`): Ethereum, Base, Polygon, Arbitrum, Optimism. У всех работает публичный Blockscout v2 без ключа. Gnosis и Polygon zkEVM отпали: их Blockscout не отдаёт список NFT адреса.
+- Владение и `tokenURI`/`uri` читаются из контрактов через multicall, как в задаче 1. Индексатор – только для поиска токенов и запасных метаданных.
+- Файлы: Ethereum остаётся в `data/originals/<contract>/`, чтобы сайт находил свои картинки; остальные сети – в `data/originals/<chain>/<contract>/`. Опись – `data/archive.json` (сеть, коллекция, контракт, токен, файл, размер в байтах, ширина/высота, откуда скачано, `tokenURI`). Опись в репозитории, сами файлы – нет (`data/originals/` в `.gitignore`).
+- Общие помощники скачивания вынесены в `scripts/lib/media.mjs` и используются обоими скриптами.
+- Флаги: `--dry` – только показать, что пройдёт фильтр; `--chain base` – одна сеть.
+
+### Фильтр спама
+
+Два списка вместо одного, потому что честные проекты тоже пишут «mint», «reward» и «$10»:
+
+- **STRONG** – так пишут только приманки: 🎁, сокращатели ссылок (`t.ly`, `bit.ly`), домены на `.cfd/.lat/.icu/.lol/.click/.top/.us/.pl`, случайная метка в названии вида `[lCz2mp1Z]`, призыв «claim your rewards», «face value of». Проверяется по всему тексту, включая описание и `external_url`.
+- **WEAK** – обычные слова и суммы (`claim`, `airdrop`, `reward`, `voucher`, `$1000`, `2000 USDT`, `lido`, `layerzero`): только в названии коллекции или токена. В описании они ничего не значат – у Adam Bomb Squad в тексте есть «3 for $10», и на старой версии фильтра вся коллекция улетала в спам.
+- Ручные списки `ARCHIVE_ALLOW` / `ARCHIVE_DENY` в `scripts/config.mjs` перебивают фильтр, у каждой записи причина. В DENY попали, например, пять контрактов с поддельными «ROARwards» (домены `lazylions.xyz`, `roarwards.net`) и раздачи на сотни тысяч адресов. `HIDDEN` из задачи 1 действует и здесь.
+- Токены без картинки в метаданных пропускаются и перечисляются в конце лога – это отсеивает пустышки, у которых нечего архивировать.
+- Запуск с `--chain` подмешивает свою сеть в уже записанную опись, а не перезаписывает её целиком.
+
+### Что собралось 2026-09-25
+
+183 файла, 854 МБ: Ethereum 152, Base 13, Polygon 8, Arbitrum 8 (из них 465 МБ – пять видео Infinite Rainbows), Optimism 2. Самые крупные оригиналы – Lazy Cubs по 10000×10000.
+
+Находки вне Ethereum, которых на сайте нет: **Lazy Lions Membership ×3** (Polygon), **Merry MCV ×5** (Base, вселенная MarsCatsVoyage), Doodles: Commemoratives 3000×3000, Playboy Community Hare Drops ×2, VeeFriends «Content» Condor (Optimism), Arbzuki, Layer3 CUBE, Nifty Island, Sunflower Land, квест-бейджи Intract.
+
+Не скачалось шесть файлов, и все шесть – мёртвые серверы: StreetDawgs #855 и DaVinci by AML ×5. Всё остальное, что отказывало по 429, вернулось после смены шлюзов.
+
+### Биткоин
+
+Адрес `bc1q2gc6zxlcqs4mn9wfcdyklt6nsqasft7mxd4vuu` проверен 2026-09-25: валидный bech32, 26 транзакций, на балансе 5992 сатоши в двух выходах. Надписей (ordinals/inscriptions) на нём нет – официальный индекс `ordinals.com` по адресу пуст, оба выхода обычные. Архивировать нечего, адрес записан в `BITCOIN` (`scripts/config.mjs`), чтобы не проверять заново. Hiro свой ordinals API закрыл, остальные индексаторы просят платный ключ.
 
 ## Задача 2. Сайт
 

@@ -13,6 +13,7 @@ data/originals/
 data/*.log
 data/meta-cache/
 data/broken.json
+data/archive-broken.json
 
 # os
 .DS_Store

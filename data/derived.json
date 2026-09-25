@@ -1174,17 +1174,23 @@
   "0x65c234d041f9ef96e2f126263727dfa582206d82": {
     "tokens": {
       "3677": {
-        "grid": false,
-        "full": false,
-        "kind": "none"
+        "thumb": true,
+        "grid": true,
+        "full": true,
+        "width": 1024,
+        "height": 1024,
+        "animated": false
       },
       "6317": {
-        "grid": false,
-        "full": false,
-        "kind": "none"
+        "thumb": true,
+        "grid": true,
+        "full": true,
+        "width": 1024,
+        "height": 1024,
+        "animated": false
       }
     },
-    "accent": "#e8643c"
+    "accent": "#ff7800"
   },
   "0x7b7dad77e4090160f9cb6ba57a5a774c12d4c28a": {
     "tokens": {

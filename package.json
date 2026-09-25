@@ -8,7 +8,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "fetch": "node scripts/fetch-collection.mjs",
-    "derive": "node scripts/derive-images.mjs"
+    "derive": "node scripts/derive-images.mjs",
+    "archive": "node scripts/archive-collection.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
