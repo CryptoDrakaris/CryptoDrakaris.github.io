@@ -3,7 +3,7 @@
     "ens": "drakaris.eth",
     "address": "0xE71859A7D000648D397b6F1A33b491BD38f26eF3"
   },
-  "fetchedAt": "2026-09-16T05:36:58.682Z",
+  "fetchedAt": "2026-09-25T09:22:52.030Z",
   "groups": [
     {
       "slug": "lazy-lions",
@@ -6197,7 +6197,7 @@
               "image": "ipfs://QmaTbcEmoGoa2HvZwEdSmV8i4d1PRWmpD3BU1QiJ97ZATr/03677.jpg",
               "imageSource": "original",
               "animationUrl": null,
-              "originalFile": null,
+              "originalFile": "3677.jpg",
               "originalAnimationFile": null,
               "attributes": [
                 {
@@ -6236,7 +6236,7 @@
               "image": "ipfs://QmaTbcEmoGoa2HvZwEdSmV8i4d1PRWmpD3BU1QiJ97ZATr/06317.jpg",
               "imageSource": "original",
               "animationUrl": null,
-              "originalFile": null,
+              "originalFile": "6317.jpg",
               "originalAnimationFile": null,
               "attributes": [
                 {
