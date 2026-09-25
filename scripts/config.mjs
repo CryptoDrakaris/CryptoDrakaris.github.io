@@ -12,6 +12,10 @@ export const INDEXER_URL = 'https://eth.blockscout.com/api/v2';
 
 // cloudflare-ipfs.com was shut down in 2024, don't add it back
 export const IPFS_GATEWAYS = [
+  // Первыми два шлюза, которые 2026-09-25 отдавали файлы без ограничения частоты,
+  // пока ipfs.io, dweb.link и pinata отвечали 403/429 на те же CID.
+  'https://ipfs.filebase.io/ipfs/',
+  'https://ipfs.raribleuserdata.com/ipfs/',
   'https://ipfs.io/ipfs/',
   'https://dweb.link/ipfs/',
   'https://w3s.link/ipfs/',
@@ -19,6 +23,41 @@ export const IPFS_GATEWAYS = [
   'https://4everland.io/ipfs/',
   'https://nftstorage.link/ipfs/',
 ];
+
+// Chains scanned by the personal archive (scripts/archive-collection.mjs).
+// `api` is a Blockscout v2 API, `viem` the chain export name in viem/chains, `rpc` a public node.
+export const CHAINS = [
+  { id: 'ethereum', name: 'Ethereum', api: INDEXER_URL, viem: 'mainnet', rpc: RPC_URL },
+  { id: 'base', name: 'Base', api: 'https://base.blockscout.com/api/v2', viem: 'base', rpc: 'https://mainnet.base.org' },
+  { id: 'polygon', name: 'Polygon', api: 'https://polygon.blockscout.com/api/v2', viem: 'polygon', rpc: 'https://polygon-rpc.com' },
+  { id: 'arbitrum', name: 'Arbitrum', api: 'https://arbitrum.blockscout.com/api/v2', viem: 'arbitrum', rpc: 'https://arb1.arbitrum.io/rpc' },
+  { id: 'optimism', name: 'Optimism', api: 'https://explorer.optimism.io/api/v2', viem: 'optimism', rpc: 'https://mainnet.optimism.io' },
+];
+
+// Archive overrides. ALLOW wins over the spam filter (a real collection whose name trips it),
+// DENY drops a contract the filter let through. Keys are lowercase contract addresses.
+export const ARCHIVE_ALLOW = {};
+export const ARCHIVE_DENY = {
+  // Polygon. Массовые раздачи и поддельные имена, проверено 2026-09-25 на polygon.blockscout.com.
+  '0x1671edc7a1fccaa4f91a92d496926a0c7bc636e7': 'имя-подделка «ETH CTIY [lCz2mp1Z] 1697914666891»',
+  '0x316d73824bc9c60f239d4c57082bcde4bfdf4f7a': 'Positive Vibes: раздача на 707 000 адресов',
+  '0xd3129cacdb83116012a1ccff3f5ee6aefe4b89e': 'безымянный «Voucher»: раздача на 430 000 адресов',
+  '0x73e117df92042603e70993c0f313b5753420d3e7': '«$AAVE NFT»: раздача с домена ethnft.co',
+  '0x76a644f19d3fc95eb6e98796df9413fa7d55333e': '«ApyMatic.net»: домен вместо названия, метаданных нет',
+  '0x7f533d91cce0a2ed9bc10c8a43cbc57b72333766': 'поддельный OpenSea: ссылка на opensea.basednft.org',
+  // Подделки под Lazy Lions: «ROARwards», домены lazylions.xyz/.org, roarwards.com/.xyz/.net.
+  // Base и Polygon, один и тот же текст на пяти контрактах.
+  '0x005f3f36aac2ae77dfa613e63806be99adbe0f93': 'фальшивые ROARwards (base)',
+  '0x5a77ca25acc438504365d8f9cc044b372e971afc': 'фальшивые ROARwards (base)',
+  '0x43593d4414ad5fbdc5a4298dbe49a451fbad08d6': 'фальшивые ROARwards (polygon)',
+  '0xdf63068c971143ec662a152fb0cb465bb45f7245': 'фальшивые ROARwards (polygon)',
+  '0xf8dfcdc7498bc169d5d7362849a4264b7cdb0138': 'фальшивые ROARwards (polygon)',
+  '0x6b0d7a38c08375a132a7b43f67fb4a97bb630471': '«NFTCard»: карта «на 2200 USDT» с usesapp.com',
+};
+
+// Bitcoin: checked 2026-09-25 on ordinals.com and mempool.space. The address holds two plain
+// outputs (5698 + 294 sat) and no inscriptions, so there is nothing to archive.
+export const BITCOIN = { address: 'bc1q2gc6zxlcqs4mn9wfcdyklt6nsqasft7mxd4vuu', inscriptions: 0 };
 
 // Contracts without tokenURI whose metadata comes from an official service.
 export const METADATA_SERVICES = {
