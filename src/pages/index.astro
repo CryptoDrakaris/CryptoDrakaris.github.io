@@ -1,6 +1,8 @@
 ---
 // Static root: pick a language from the browser, fall back to English.
-import { DEFAULT_LANG, LANGS } from '../i18n/ui';
+// Без JS здесь не автопереход, а выбор языка ссылками: `meta http-equiv="refresh"`
+// уводит пользователя без его участия и нарушает WCAG 2.2.1 (axe meta-refresh).
+import { DEFAULT_LANG, LANGS, LANG_NAME } from '../i18n/ui';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const fallback = `${base}/${DEFAULT_LANG}/`;
 ---
@@ -9,10 +11,11 @@ const fallback = `${base}/${DEFAULT_LANG}/`;
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Drakaris × Lazy Lions</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Drakaris</title>
     <meta name="robots" content="noindex" />
-    <meta http-equiv="refresh" content={`1; url=${fallback}`} />
     <link rel="canonical" href={fallback} />
+    <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.svg`} type="image/svg+xml" />
     <script is:inline define:vars={{ base, langs: LANGS, fallback }}>
       var pick = (navigator.languages || [navigator.language || ''])
         .map(function (l) { return l.toLowerCase().slice(0, 2); })
@@ -20,8 +23,45 @@ const fallback = `${base}/${DEFAULT_LANG}/`;
       location.replace(pick ? base + '/' + pick + '/' : fallback);
     </script>
     <style>
-      body { background: #080a0c; }
+      html { color-scheme: dark; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-content: center;
+        gap: 24px;
+        padding: 24px;
+        background: #0b0b0d;
+        color: #f2eee8;
+        font: 1rem/1.5 system-ui, sans-serif;
+        text-align: center;
+      }
+      h1 { margin: 0; font-size: 1rem; font-weight: 500; }
+      ul { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 0; padding: 0; list-style: none; }
+      a {
+        display: block;
+        min-height: 44px;
+        padding: 10px 20px;
+        border: 1px solid #ff6a3d;
+        border-radius: 999px;
+        color: #f2eee8;
+        text-decoration: none;
+      }
+      a:hover, a:focus-visible { background: #ff6a3d; color: #0b0b0d; }
     </style>
   </head>
-  <body></body>
+  <body>
+    <main>
+      <h1>Drakaris · choose a language</h1>
+      <ul>
+        {
+          LANGS.map((l) => (
+            <li>
+              <a href={`${base}/${l}/`} hreflang={l} lang={l}>{LANG_NAME[l]}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </main>
+  </body>
 </html>
