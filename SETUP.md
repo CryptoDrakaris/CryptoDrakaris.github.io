@@ -68,6 +68,12 @@ npm run derive   # сделать превью и акцентные цвета 
 npm run archive  # личный архив: оригиналы со всех сетей на диск, на сайт не попадают
 ```
 
+Проверка доступности перед публикацией (нужны зависимости проекта, ставятся через `npm install`):
+
+```bash
+node .claude/skills/web-design-audit/scripts/axe-static.mjs dist --limit 600
+```
+
 ## Личный архив по всем сетям
 
 `npm run archive` скачивает оригиналы NFT из Ethereum, Base, Polygon, Arbitrum и Optimism в `data/originals` и пишет опись в `data/archive.json`. Сайт от этого не меняется: в нём остаются только коллекции Ethereum.
