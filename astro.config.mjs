@@ -11,5 +11,9 @@ export default defineConfig({
   site: process.env.SITE || undefined,
   base: process.env.BASE_PATH || undefined,
   trailingSlash: 'always',
-  integrations: [sitemap({ filter: (page) => !page.endsWith('/404/') })],
+  // Корень / – noindex-заглушка с выбором языка, в карте сайта ему не место:
+  // поисковик ругается на «submitted URL marked noindex».
+  integrations: [
+    sitemap({ filter: (page) => !page.endsWith('/404/') && new URL(page).pathname !== (process.env.BASE_PATH || '/') }),
+  ],
 });
