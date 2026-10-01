@@ -1,7 +1,7 @@
 ---
 import type { Lang } from '../i18n/ui';
 import { href } from '../lib/site';
-import { derived, gridSrcset, hasImage, tokenLabel, tokenTitle, tokenPath, media, type Collection, type Token } from '../lib/collection';
+import { derived, gridSrcset, hasImage, tokenLabel, tokenPath, media, type Collection, type Token } from '../lib/collection';
 
 interface Props {
   lang: Lang;
@@ -25,6 +25,11 @@ const kind = m?.animated ? 'GIF' : m?.kind && !m.grid && m.kind !== 'none' && m.
   data-traits={JSON.stringify(traits)}
   style={`--card-accent:${col.accent}`}
 >
+  <!--
+    Картинка декоративная: имя токена и коллекция стоят текстом в этой же ссылке,
+    и скринридер читал бы их дважды (axe image-redundant-alt). На странице токена
+    у большой картинки alt осмысленный – там подписи рядом нет.
+  -->
   <div class="img">
     {
       hasImage(col, token) ? (
@@ -32,14 +37,14 @@ const kind = m?.animated ? 'GIF' : m?.kind && !m.grid && m.kind !== 'none' && m.
           src={derived(col, token, 'grid')}
           srcset={gridSrcset(col, token)}
           sizes="(max-width: 480px) 45vw, (max-width: 900px) 30vw, 230px"
-          alt={tokenTitle(col, token)}
+          alt=""
           width="600"
           height="600"
           loading={eager ? 'eager' : 'lazy'}
           decoding="async"
         />
       ) : (
-        <div class="placeholder" role="img" aria-label={tokenTitle(col, token)}>
+        <div class="placeholder" aria-hidden="true">
           <span>{col.name}</span>
         </div>
       )
