@@ -16,12 +16,24 @@ export const getStaticPaths = () => LANGS.map((lang) => ({ params: { lang } }));
 const lang = Astro.params.lang as Lang;
 const { t, tn, nf } = useT(lang);
 
-// hero fan: first imaged token of each flagship
-const fan = flagships
-  .map((g) => {
-    for (const col of g.members) for (const token of col.tokens) if (hasImage(col, token)) return { g, col, token };
-    return null;
-  })
+// Hero fan. Первой идёт любимая карточка владельца – розовый лев Lazy Lion #4846,
+// она же занимает верхнюю позицию веера (.f0). Дальше по первому токену с картинкой
+// от каждого оставшегося флагмана. Если лев однажды уйдёт из кошелька, веер соберётся
+// как раньше – с первого токена Lazy Lions.
+const PINNED = { collection: 'lazy-lions', tokenId: '4846' };
+
+const firstImaged = (g: (typeof flagships)[number]) => {
+  for (const col of g.members) for (const token of col.tokens) if (hasImage(col, token)) return { g, col, token };
+  return null;
+};
+
+const pinned = flagships
+  .flatMap((g) => g.members.map((col) => ({ g, col })))
+  .filter(({ col }) => col.slug === PINNED.collection)
+  .flatMap(({ g, col }) => col.tokens.filter((token) => token.tokenId === PINNED.tokenId && hasImage(col, token)).map((token) => ({ g, col, token })))
+  .at(0);
+
+const fan = [pinned, ...flagships.filter((g) => g !== pinned?.g).map(firstImaged)]
   .filter(Boolean)
   .slice(0, 6) as { g: (typeof flagships)[number]; col: (typeof collections)[number]; token: any }[];
 
@@ -218,8 +230,9 @@ const posts = (await postsFor(lang)).slice(0, 3);
     font-weight: 700;
     font-size: 0.8rem;
   }
-  .f0 { left: 0; top: 6%; transform: rotate(-8deg); z-index: 3; }
-  .f1 { left: 27%; top: 0; transform: rotate(3deg); z-index: 4; }
+  /* .f0 – закреплённая карточка: выше всех и ничем не перекрыта */
+  .f0 { left: 27%; top: 0; transform: rotate(3deg); z-index: 7; }
+  .f1 { left: 0; top: 6%; transform: rotate(-8deg); z-index: 3; }
   .f2 { right: 0; top: 8%; transform: rotate(9deg); z-index: 2; }
   .f3 { left: 6%; bottom: 0; transform: rotate(5deg); z-index: 5; }
   .f4 { left: 38%; bottom: 3%; transform: rotate(-4deg); z-index: 6; }
