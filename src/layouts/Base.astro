@@ -63,6 +63,36 @@ function hexRgb(h: string) {
     <meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
     <meta name="twitter:creator" content="@cryptodrakaris" />
 
+    <!--
+      Переход карточка NFT ↔ страница токена: картинка карточки перетекает в большую.
+      У большой картинки имя nft-art постоянное (CSS страницы токена), карточке оно
+      ставится только на время перехода – иначе браузер снимал бы все картинки сетки.
+      Скрипт в head, потому что pagereveal срабатывает до первой отрисовки. В этот
+      момент страница ещё не прокручена к якорю или прежнему месту, поэтому видимость
+      карточки проверяется только при уходе со страницы.
+    -->
+    <script is:inline>
+      (() => {
+        const pick = (url, visibleOnly) => {
+          if (!url) return null;
+          const path = new URL(url).pathname;
+          for (const img of document.querySelectorAll('a.nft img')) {
+            if (new URL(img.closest('a').href).pathname !== path) continue;
+            if (!visibleOnly) return img;
+            const r = img.getBoundingClientRect();
+            if (r.bottom > 0 && r.top < innerHeight) return img;
+          }
+          return null;
+        };
+        const mark = (img, vt) => {
+          if (!img || !vt) return;
+          img.style.viewTransitionName = 'nft-art';
+          vt.finished.finally(() => (img.style.viewTransitionName = ''));
+        };
+        addEventListener('pageswap', (e) => mark(pick(e.activation?.entry.url, true), e.viewTransition));
+        addEventListener('pagereveal', (e) => mark(pick(window.navigation?.activation?.from?.url, false), e.viewTransition));
+      })();
+    </script>
   </head>
   <body>
     <a class="skip" href="#main">{t('nav.skip')}</a>

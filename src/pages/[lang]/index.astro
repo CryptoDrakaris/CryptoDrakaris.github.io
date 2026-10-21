@@ -201,6 +201,8 @@ const posts = (await postsFor(lang)).slice(0, 3);
   .fan {
     position: relative;
     height: clamp(340px, 42vw, 520px);
+    /* размеры веера для cqw/cqh в раскрытии; высота задана явно, поэтому size безопасен */
+    container-type: size;
   }
   .fan-card {
     position: absolute;
@@ -230,13 +232,26 @@ const posts = (await postsFor(lang)).slice(0, 3);
     font-weight: 700;
     font-size: 0.8rem;
   }
-  /* .f0 – закреплённая карточка: выше всех и ничем не перекрыта */
-  .f0 { left: 27%; top: 0; transform: rotate(3deg); z-index: 7; }
-  .f1 { left: 0; top: 6%; transform: rotate(-8deg); z-index: 3; }
-  .f2 { right: 0; top: 8%; transform: rotate(9deg); z-index: 2; }
-  .f3 { left: 6%; bottom: 0; transform: rotate(5deg); z-index: 5; }
-  .f4 { left: 38%; bottom: 3%; transform: rotate(-4deg); z-index: 6; }
-  .f5 { right: 2%; bottom: 6%; transform: rotate(-10deg); z-index: 1; }
+  /* .f0 – закреплённая карточка: выше всех и ничем не перекрыта.
+     --dx/--dy – сдвиг до стопки под .f0 (left 27%, top 0) в единицах веера:
+     карточка шириной 46cqw, у прижатых к низу верх на 100cqh − 46cqw. */
+  .f0 { left: 27%; top: 0; transform: rotate(3deg); z-index: 7; --i: 0; }
+  .f1 { left: 0; top: 6%; transform: rotate(-8deg); z-index: 3; --i: 1; --dx: 27cqw; --dy: -6cqh; }
+  .f2 { right: 0; top: 8%; transform: rotate(9deg); z-index: 2; --i: 2; --dx: -27cqw; --dy: -8cqh; }
+  .f3 { left: 6%; bottom: 0; transform: rotate(5deg); z-index: 5; --i: 3; --dx: 21cqw; --dy: calc(46cqw - 100cqh); }
+  .f4 { left: 38%; bottom: 3%; transform: rotate(-4deg); z-index: 6; --i: 4; --dx: -11cqw; --dy: calc(46cqw - 97cqh); }
+  .f5 { right: 2%; bottom: 6%; transform: rotate(-10deg); z-index: 1; --i: 5; --dx: -25cqw; --dy: calc(46cqw - 94cqh); }
+  /* при загрузке карточки раздаются веером из стопки под розовым львом;
+     backwards, а не both, чтобы после раскрытия работал :hover */
+  .fan-card {
+    animation: fan-deal 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+    animation-delay: calc(0.15s + var(--i) * 0.07s);
+  }
+  @keyframes fan-deal {
+    from {
+      transform: translate(var(--dx, 0%), var(--dy, 0%)) rotate(0deg) scale(0.96);
+    }
+  }
   .fan-card:hover {
     transform: rotate(0) scale(1.04);
     z-index: 10;
