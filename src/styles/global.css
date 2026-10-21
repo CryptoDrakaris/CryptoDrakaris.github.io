@@ -283,7 +283,26 @@ p {
   border-radius: var(--radius);
 }
 
+/* Переходы между страницами без скриптов: тема одной страницы плавно сменяет другую.
+   Картинка токена (nft-art) перетекает из карточки, скрипт в Base.astro. */
+@view-transition {
+  navigation: auto;
+}
+::view-transition-group(nft-art) {
+  animation-duration: 0.4s;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+/* карточка квадратная, а большая картинка может быть вытянутой: обрезаем, а не сплющиваем */
+::view-transition-old(nft-art),
+::view-transition-new(nft-art) {
+  height: 100%;
+  object-fit: cover;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
   *,
   *::before,
   *::after {
