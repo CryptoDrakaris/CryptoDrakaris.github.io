@@ -5,7 +5,6 @@
 :root {
   --wrap: 1200px;
   --gutter: clamp(16px, 4vw, 40px);
-  color-scheme: dark;
 }
 
 *,
@@ -40,8 +39,14 @@ a {
   color: inherit;
 }
 
+/* The ring color is fixed on <html> by the page theme. A flagship card carries its own
+   data-theme, but its ring is drawn outside the card on the page background, so the
+   brand accent there could vanish (Bubblegum navy on the shell black was 1.48:1). */
+:root {
+  --focus-ring: var(--accent);
+}
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -56,6 +61,10 @@ h3 {
   line-height: 1.08;
   margin: 0;
   text-wrap: balance;
+  /* long Kazakh words ("Жинағанымның", "қауымдастығына") are wider than a 320px column.
+     anywhere, not break-word: headings sit in grids, and only anywhere lowers the
+     min-content width the grid sizes them by */
+  overflow-wrap: anywhere;
 }
 h1 {
   text-shadow: var(--display-shadow);
@@ -168,20 +177,27 @@ p {
   text-decoration: none;
   cursor: pointer;
   box-shadow: var(--shadow);
-  transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s, transform 0.2s;
+  transition: background-color 150ms ease-out, border-color 150ms ease-out, color 150ms ease-out, box-shadow 150ms ease-out;
 }
-.btn:hover {
-  border-color: var(--accent);
-  box-shadow: var(--shadow-hover);
+/* Hover only where a pointer can hover: on touch a tapped element kept its hover look.
+   Every hover response is 150ms ease-out. */
+@media (hover: hover) {
+  .btn:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-hover);
+  }
+  .btn--accent:hover {
+    background: var(--accent-soft);
+    border-color: var(--outline, var(--accent-soft));
+  }
+  .link-arrow:hover::after {
+    transform: translateX(4px);
+  }
 }
 .btn--accent {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--accent-ink);
-}
-.btn--accent:hover {
-  background: var(--accent-soft);
-  border-color: var(--outline, var(--accent-soft));
 }
 /* themes with cartoon outlines set --outline so accent buttons keep the black stroke */
 .btn--accent {
@@ -207,10 +223,7 @@ p {
 }
 .link-arrow::after {
   content: '→';
-  transition: transform 0.2s;
-}
-.link-arrow:hover::after {
-  transform: translateX(4px);
+  transition: transform 150ms ease-out;
 }
 
 /* ---------- cards & grids ---------- */

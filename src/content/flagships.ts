@@ -3,7 +3,8 @@ import type { Lang, Plural } from '../i18n/ui';
 import type { ThemeKey } from '../lib/themes';
 
 export type FlagshipCopy = {
-  /** hero line 1, gets the owned count: "{n} lions." */
+  /** hero line 1, gets the owned count of the whole group (Lazy Lions: Cubs, Scenes, Butts…),
+      so it names the group, not one kind: "{n} from the pride." */
   heroCount: Plural;
   /** hero line 2, accent color */
   heroLine: string;
@@ -36,7 +37,7 @@ export const FLAGSHIP_INFO: Record<string, Flagship> = {
     launched: '2021',
     copy: {
       en: {
-        heroCount: { one: '{n} lion.', other: '{n} lions.' },
+        heroCount: { other: '{n} from the pride.' },
         heroLine: 'One pride.',
         lead: 'Lazy Lions were my first love in NFTs. Lions, cubs, scenes, bungalows and comics – the whole universe lives here.',
         whyTitle: 'More than a JPEG in a wallet.',
@@ -48,7 +49,7 @@ export const FLAGSHIP_INFO: Record<string, Flagship> = {
         about: 'Lazy Lions is a collection of 10,080 lions on Ethereum. The idea: ownership is the start, not the end. A Lion unlocks tools, content and ways to take part in the ecosystem.',
       },
       ru: {
-        heroCount: { one: '{n} лев.', few: '{n} льва.', many: '{n} львов.', other: '{n} льва.' },
+        heroCount: { other: '{n} из прайда.' },
         heroLine: 'Один прайд.',
         lead: 'Lazy Lions – моя первая любовь в NFT. Львы, львята, сцены, бунгало и комиксы – здесь живёт вся вселенная.',
         whyTitle: 'Больше, чем картинка в кошельке.',
@@ -60,7 +61,7 @@ export const FLAGSHIP_INFO: Record<string, Flagship> = {
         about: 'Lazy Lions – коллекция из 10 080 львов на Ethereum. Идея в том, что покупка – только начало. Лев открывает инструменты, контент и участие в экосистеме.',
       },
       kk: {
-        heroCount: { other: '{n} арыстан.' },
+        heroCount: { other: 'Прайдтан {n}.' },
         heroLine: 'Бір прайд.',
         lead: 'Lazy Lions – NFT әлеміндегі алғашқы махаббатым. Арыстандар, күшіктер, сахналар, бунгалолар және комикстер – бүкіл әлем осында.',
         whyTitle: 'Әмияндағы суреттен әлдеқайда көп.',
@@ -188,7 +189,7 @@ Object.assign(FLAGSHIP_INFO, {
     creator: 'Pablo Stanley',
     copy: {
       en: {
-        heroCount: { one: '{n} bot.', other: '{n} bots.' },
+        heroCount: { other: '{n} in the fleet.' },
         heroLine: 'Beep boop, gm.',
         lead: 'Friendly droids by Pablo Stanley, their robopets and one very special TIME cover.',
         whyTitle: 'Tin faces, big hearts.',
@@ -200,7 +201,7 @@ Object.assign(FLAGSHIP_INFO, {
         about: 'Robotos is a collection of 9,999 droids on Ethereum, launched in August 2021 and drawn by designer Pablo Stanley.',
       },
       ru: {
-        heroCount: { one: '{n} робот.', few: '{n} робота.', many: '{n} роботов.', other: '{n} робота.' },
+        heroCount: { other: '{n} в отряде.' },
         heroLine: 'Бип-буп, gm.',
         lead: 'Дружелюбные дроиды Пабло Стэнли, их робопитомцы и одна особенная обложка TIME.',
         whyTitle: 'Жестяные лица, большие сердца.',
@@ -212,7 +213,7 @@ Object.assign(FLAGSHIP_INFO, {
         about: 'Robotos – коллекция из 9 999 дроидов на Ethereum, запущена в августе 2021 года. Автор рисунков – дизайнер Пабло Стэнли.',
       },
       kk: {
-        heroCount: { other: '{n} робот.' },
+        heroCount: { other: 'Отрядта {n}.' },
         heroLine: 'Бип-буп, gm.',
         lead: 'Пабло Стэнлидің мейірімді дроидтары, олардың робо-үй жануарлары және бір ерекше TIME мұқабасы.',
         whyTitle: 'Қаңылтыр бет, үлкен жүрек.',

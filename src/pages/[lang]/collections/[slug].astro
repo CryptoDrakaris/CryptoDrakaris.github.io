@@ -214,8 +214,13 @@ const website = info?.links.website;
   .why-head {
     display: grid;
     gap: 18px;
-    position: sticky;
-    top: 96px;
+  }
+  /* same rule as the token picture: no sticky in short windows */
+  @media (min-height: 720px) {
+    .why-head {
+      position: sticky;
+      top: 96px;
+    }
   }
   .why-head h2 {
     font-size: calc(clamp(2rem, 4.5vw, 3.2rem) * var(--display-scale));

@@ -9,7 +9,9 @@ import path from 'node:path';
 const ROOT = path.resolve(import.meta.dirname, '..');
 const DATA = path.join(ROOT, 'data');
 const DERIVED = path.join(ROOT, 'public', 'derived');
-const BG = { r: 11, g: 11, b: 13 }; // Drakaris shell background, accents must read on it
+// Lightest Drakaris surface (--card #151517): an accent that reads here also reads on --bg-2
+// and --bg. Picking against --bg alone let 13 accents fall to 4.2:1 on cards.
+const BG = { r: 21, g: 21, b: 23 };
 
 const exists = (p) => access(p).then(() => true, () => false);
 const RASTER = /\.(png|jpe?g|gif|webp|avif|svg)$/i;
@@ -71,10 +73,12 @@ function pickAccent(samples) {
   const hsl = rgbToHsl(best);
   hsl.s = Math.max(hsl.s, 0.5);
   hsl.l = Math.min(Math.max(hsl.l, 0.45), 0.62);
-  let rgb = hslToRgb(hsl);
+  // check the color as it will be written: rounding to hex could drop it just under 4.5
+  const rounded = (c) => ({ r: Math.round(c.r), g: Math.round(c.g), b: Math.round(c.b) });
+  let rgb = rounded(hslToRgb(hsl));
   while (contrast(rgb, BG) < 4.5 && hsl.l < 0.9) {
     hsl.l += 0.02;
-    rgb = hslToRgb(hsl);
+    rgb = rounded(hslToRgb(hsl));
   }
   return hex(rgb);
 }

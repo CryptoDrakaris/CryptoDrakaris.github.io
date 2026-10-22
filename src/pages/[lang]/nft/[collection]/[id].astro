@@ -66,7 +66,7 @@ const description = token.description && token.description.trim() !== col.name &
   brand={group.kind === 'flagship' ? group.name : undefined}
 >
   <div class="wrap">
-    <nav class="crumbs" aria-label="Breadcrumbs">
+    <nav class="crumbs" aria-label={t('token.nav')}>
       <a class="back" href={backHref}>← {t('token.back', { name: backName })}</a>
       {
         col.tokens.length > 1 && (
@@ -95,7 +95,7 @@ const description = token.description && token.description.trim() !== col.name &
         ) : (
           <div class="art placeholder">
             <span>{col.name}</span>
-            <p>{t('token.noPreview')}</p>
+            <p>{t(original ? 'token.noPreview' : 'token.lost')}</p>
           </div>
         )
       }
@@ -182,8 +182,10 @@ const description = token.description && token.description.trim() !== col.name &
     text-decoration: none;
     font-size: 0.92rem;
   }
-  .crumbs a:hover {
-    color: var(--accent);
+  @media (hover: hover) {
+    .crumbs a:hover {
+      color: var(--accent);
+    }
   }
   .pager {
     display: flex;
@@ -201,10 +203,16 @@ const description = token.description && token.description.trim() !== col.name &
     border-radius: var(--radius);
     overflow: hidden;
     border: 1px solid var(--line-strong);
-    position: sticky;
-    top: 90px;
     cursor: zoom-in;
     background: var(--bg-2);
+  }
+  /* sticky only in windows tall enough for the picture: at 200% zoom (960×475) its bottom
+     45px stayed hidden for the whole scroll */
+  @media (min-height: 720px) {
+    .art {
+      position: sticky;
+      top: 90px;
+    }
   }
   /* общее имя с картинкой карточки, по которой перешли (Base.astro) */
   .art img {

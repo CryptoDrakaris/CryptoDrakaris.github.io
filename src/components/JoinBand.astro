@@ -13,7 +13,7 @@ interface Props {
 const { lang, project } = Astro.props;
 const { t } = useT(lang);
 
-const LABELS = { website: 'Website', x: 'X', discord: 'Discord', instagram: 'Instagram', youtube: 'YouTube' } as const;
+const LABELS = { website: t('flagship.website'), x: 'X', discord: 'Discord', instagram: 'Instagram', youtube: 'YouTube' } as const;
 const ICONS = { website: 'globe', x: 'x', discord: 'discord', instagram: 'instagram', youtube: 'youtube' } as const;
 const official = project ? (Object.entries(project.links) as [keyof Links, string][]).filter(([, url]) => url) : [];
 ---
