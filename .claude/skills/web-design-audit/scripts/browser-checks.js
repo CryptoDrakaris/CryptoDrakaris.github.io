@@ -265,6 +265,28 @@
   }
   report.focusRingContrastFails = Object.fromEntries(ringSeen);
 
+  // heading-word-fit: a word wider than its heading either overflows or, under
+  // overflow-wrap: anywhere, splits mid-letter ("BUBBLEGU / M"). Both are invisible to the
+  // horizontal-scroll check once wrapping hides them, so measure each word on its own.
+  report.headingWordTooWide = [];
+  for (const h of document.querySelectorAll('h1, h2, h3')) {
+    if (!isVisible(h) || h.closest('[aria-hidden="true"]')) continue;
+    for (const node of [h, ...h.querySelectorAll('*')]) {
+      const text = [...node.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join(' ').trim();
+      if (!text) continue;
+      const probe = document.createElement('span');
+      probe.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;overflow-wrap:normal';
+      node.appendChild(probe);
+      for (const word of text.split(/\s+/)) {
+        probe.textContent = word;
+        const w = probe.getBoundingClientRect().width;
+        if (w > h.clientWidth + 0.5) report.headingWordTooWide.push(`${h.tagName.toLowerCase()} "${word}" ${Math.round(w)}px in ${h.clientWidth}px`);
+      }
+      probe.remove();
+    }
+  }
+  report.headingWordTooWide = report.headingWordTooWide.slice(0, LIMIT);
+
   // sticky-fit: a sticky block taller than the room under its offset hides its own bottom
   // for the whole scroll (200% zoom, landscape phones). Full-width top bars are the header.
   report.stickyTooTall = [...document.querySelectorAll('body *')]

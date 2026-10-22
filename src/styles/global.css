@@ -61,9 +61,11 @@ h3 {
   line-height: 1.08;
   margin: 0;
   text-wrap: balance;
-  /* long Kazakh words ("Жинағанымның", "қауымдастығына") are wider than a 320px column.
+  /* Safety net only: a word wider than its column would push the page past 320px.
      anywhere, not break-word: headings sit in grids, and only anywhere lowers the
-     min-content width the grid sizes them by */
+     min-content width the grid sizes them by. It splits words mid-letter, so the real fix
+     is size and copy that fit (theme --display-scale, short KK words); check with the
+     word-fit scan in web-design-audit */
   overflow-wrap: anywhere;
 }
 h1 {
