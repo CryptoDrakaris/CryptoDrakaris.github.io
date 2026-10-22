@@ -219,6 +219,119 @@
     .map(describe);
   report.focusNote = `${focusSelectors.length} author focus rules found${cssReadable ? '' : ' (some cross-origin sheets unreadable)'}. Browser default ring applies where outline is not removed. Confirm visually with real Tab presses.`;
 
+  // focus-ring-background: the ring is drawn outside the element (outline-offset >= 0), so it
+  // must read against the parent's background, not the element's own. Catches cards that carry
+  // their own theme (data-theme) and recolor the ring with an accent made for another surface.
+  // The ring color is resolved inside the element, where its custom properties apply.
+  const ringColor = (el, value) => {
+    const probe = document.createElement('span');
+    probe.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+    probe.style.color = value;
+    el.appendChild(probe);
+    const c = parse(getComputedStyle(probe).color);
+    probe.remove();
+    return c;
+  };
+  const ringRules = [];
+  let ringOrder = 0;
+  const collectRings = (rules) => {
+    for (const r of rules) {
+      if (r.cssRules && !r.selectorText) collectRings(r.cssRules);
+      if (!r.selectorText || !/:focus(-visible)?\b/.test(r.selectorText)) continue;
+      const color = r.style.outlineColor || (r.style.outline || '').split(/\s+(?![^(]*\))/).find((t) => /^(#|rgb|hsl|oklch|var\(|[a-z]+$)/.test(t) && !/^(solid|dashed|dotted|double|auto|none|thin|medium|thick)$/.test(t));
+      ringOrder++; // later rule wins a specificity tie, as in the cascade
+      if (color) for (const sel of r.selectorText.split(',')) ringRules.push({ base: sel.replace(/:focus(-visible|-within)?\b/g, '').trim() || '*', spec: specificity(sel), order: ringOrder, color });
+    }
+  };
+  for (const sheet of document.styleSheets) {
+    try {
+      collectRings(sheet.cssRules);
+    } catch {}
+  }
+  const ringSeen = new Map();
+  for (const el of interactive) {
+    if (el.getAttribute('tabindex') === '-1' || el.closest('[aria-hidden="true"], [inert]')) continue; // never focused by keyboard
+    const rule = strongest(el, ringRules);
+    if (!rule) continue;
+    const fg = ringColor(el, rule.color);
+    const bg = effectiveBg(el.parentElement || el);
+    if (!fg || !bg) continue;
+    const r = ratio(blend(fg, bg), bg);
+    if (r >= 3) continue;
+    const k = `${hex(fg)} on ${hex(bg)}`;
+    if (!ringSeen.has(k)) ringSeen.set(k, { ratio: +r.toFixed(2), need: 3, examples: [] });
+    const e = ringSeen.get(k);
+    if (e.examples.length < 3) e.examples.push(describe(el));
+  }
+  report.focusRingContrastFails = Object.fromEntries(ringSeen);
+
+  // sticky-fit: a sticky block taller than the room under its offset hides its own bottom
+  // for the whole scroll (200% zoom, landscape phones). Full-width top bars are the header.
+  report.stickyTooTall = [...document.querySelectorAll('body *')]
+    .filter((el) => getComputedStyle(el).position === 'sticky' && isVisible(el) && el.getBoundingClientRect().width < vw * 0.9)
+    .map((el) => ({ el, hidden: Math.round((parseFloat(getComputedStyle(el).top) || 0) + el.getBoundingClientRect().height - window.innerHeight) }))
+    .filter((x) => x.hidden > 0)
+    .slice(0, LIMIT)
+    .map((x) => `${describe(x.el)} bottom ${x.hidden}px below the window`);
+
+  // overlay-fit: menus that open from a sticky/fixed header cannot be scrolled into view,
+  // so a panel taller than the window must scroll itself. Opens each <details> briefly.
+  report.overlayTooTall = [];
+  for (const d of document.querySelectorAll('details')) {
+    if (!d.closest('header, nav') || !isVisible(d.querySelector('summary') || d)) continue;
+    const wasOpen = d.open;
+    d.open = true;
+    for (const panel of d.querySelectorAll(':scope > :not(summary)')) {
+      const r = panel.getBoundingClientRect();
+      const scrolls = /(auto|scroll)/.test(getComputedStyle(panel).overflowY) && panel.scrollHeight > panel.clientHeight;
+      if (r.bottom > window.innerHeight + 1 && !scrolls) report.overlayTooTall.push(`${describe(panel)} bottom ${Math.round(r.bottom - window.innerHeight)}px below the window, no own scroll`);
+    }
+    d.open = wasOpen;
+  }
+
+  // color-scheme-per-theme: scrollbars and form controls follow color-scheme, the mobile
+  // browser bar follows theme-color; both should match the page background.
+  const pageBg = parse(getComputedStyle(document.documentElement).backgroundColor) || parse(getComputedStyle(document.body).backgroundColor);
+  if (pageBg && pageBg.a > 0) {
+    const light = lum(pageBg) > 0.4;
+    const scheme = getComputedStyle(document.documentElement).colorScheme;
+    report.colorScheme = { pageBg: hex(pageBg), colorScheme: scheme, mismatch: (light && /^dark/.test(scheme)) || (!light && /^light/.test(scheme)) };
+    const meta = document.querySelector('meta[name="theme-color"]:not([media])');
+    if (meta) {
+      const probe = document.createElement('span');
+      probe.style.color = meta.content;
+      document.body.appendChild(probe);
+      const tc = parse(getComputedStyle(probe).color);
+      probe.remove();
+      if (tc) report.colorScheme.themeColor = { value: meta.content, differsFromBg: ratio(tc, pageBg) > 1.5 };
+    }
+  }
+
+  // hover-media and motion timing: hover that moves or scales sticks after a tap on touch
+  // screens unless it sits under @media (hover: hover); hover responses should share one timing.
+  const hoverMoves = [];
+  const durations = new Set();
+  const walkHover = (rules, underHoverMedia) => {
+    for (const r of rules) {
+      if (r.media && r.cssRules) {
+        walkHover(r.cssRules, underHoverMedia || /hover:\s*hover|any-hover:\s*hover/.test(r.media.mediaText));
+        continue;
+      }
+      if (r.cssRules && !r.selectorText) walkHover(r.cssRules, underHoverMedia);
+      if (!r.selectorText) continue;
+      const s = r.style;
+      if (s.transitionDuration) for (const d of s.transitionDuration.split(',')) durations.add(d.trim());
+      if (/:hover\b/.test(r.selectorText) && !underHoverMedia && (s.transform || s.translate || s.scale || s.rotate)) hoverMoves.push(r.selectorText);
+    }
+  };
+  for (const sheet of document.styleSheets) {
+    try {
+      walkHover(sheet.cssRules, false);
+    } catch {}
+  }
+  report.hoverMotionOutsideHoverMedia = [...new Set(hoverMoves)].slice(0, LIMIT);
+  report.transitionDurations = [...durations].filter((d) => d !== '0s').sort();
+
   // images: oversized, missing dimensions, lazy above the fold
   const dpr = window.devicePixelRatio || 1;
   report.images = [...document.images]
