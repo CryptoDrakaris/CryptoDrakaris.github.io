@@ -313,7 +313,8 @@ const kk: Record<UIKey, string | Plural> = {
   'join.lead': 'NFT мен web3 қызықтыра ма? X пен TikTok-та жазыл: тредтер, видеолар және әмияннан жаңа олжалар.',
 
   'collections.eyebrow': 'Коллекциялар',
-  'collections.title': 'Жинағанымның бәрі',
+  // short words on purpose: a 12–14 letter word does not fit a 320px column in the display font
+  'collections.title': 'Менің жинағым',
   'collections.lead': '{collections} ішінде {tokens}. Алдымен флагмандар, содан кейін қалғандары.',
   'collections.open': 'Ашу',
 
@@ -326,7 +327,7 @@ const kk: Record<UIKey, string | Plural> = {
   'flagship.members': 'Осы әлемде',
   'flagship.gallery': 'Менің {name}',
   'flagship.official': 'Ресми арналар',
-  'flagship.community.title': '{name} қауымдастығына қосыл.',
+  'flagship.community.title': '{name} қауымына қосыл.',
   'flagship.cta.gallery': 'Менің токендерім',
   'flagship.disclaimer': 'Холдердің фан-беті. {name} командасымен байланысты емес және олар мақұлдамаған.',
 
