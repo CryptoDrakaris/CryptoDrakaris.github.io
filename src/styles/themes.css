@@ -20,7 +20,7 @@
   --bg-2: #111113;
   --card: #151517;
   --line: #242428;
-  --line-strong: #34343a;
+  --line-strong: #606068; /* control borders 3:1 on --bg, was #34343a (~1.6:1) */
   --text: #f2eee8;
   --muted: #aaa49c;
   --dim: #8d877f;
@@ -49,7 +49,7 @@
   --bg-2: #0f1216;
   --card: #111418;
   --line: #1f242b;
-  --line-strong: #2c333c;
+  --line-strong: #5a5f68; /* control borders 3:1 on --bg, was #2c333c (~1.6:1) */
   --text: #e7ebef;
   --muted: #8a96a6;
   --dim: #7d8898;
@@ -193,7 +193,7 @@
   --bg-2: #111111;
   --card: #151312;
   --line: #2a2622;
-  --line-strong: #3d3630;
+  --line-strong: #655c53; /* control borders 3:1 on --bg, was #3d3630 (~1.6:1) */
   --text: #ede6d8;
   --muted: #a39a8d; /* site #7a7269 lifted to pass 4.5:1 */
   --dim: #938a7e;
@@ -238,7 +238,7 @@
   --muted: #303030;
   --dim: #3d3d3d;
   --accent: #d41b20; /* site red #ec2227 darkened to pass 4.5:1 as text */
-  --accent-soft: #ec2227;
+  --accent-soft: #dc1e23; /* hover fill: site red #ec2227 gave white text 4.35:1, this is 4.94:1 */
   --accent-ink: #ffffff;
   --accent-rgb: 236 34 39;
   --header-bg: rgb(255 255 255 / 0.94);
@@ -272,7 +272,7 @@
   --bg-2: #181a1c;
   --card: #181a1c;
   --line: #24272b;
-  --line-strong: #383c42;
+  --line-strong: #62676f; /* control borders 3:1 on --bg, was #383c42 (~1.6:1) */
   --text: #ffffff;
   --muted: #a3a7b0; /* site greys #898d97/#666 lifted to pass 4.5:1 */
   --dim: #979ba4;

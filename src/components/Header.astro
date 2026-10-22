@@ -137,10 +137,16 @@ const isActive = (p: string) =>
     font-size: 0.9rem;
     padding: 10px 12px;
     border-radius: var(--btn-radius);
-    transition: color 0.2s, background-color 0.2s;
+    transition: color 150ms ease-out, background-color 150ms ease-out;
   }
-  .nav a:hover {
-    color: var(--text);
+  @media (hover: hover) {
+    .nav a:hover,
+    .langs a:hover {
+      color: var(--text);
+    }
+    .icon-link:hover {
+      color: var(--accent);
+    }
   }
   /* solid accent, not a tint: the tinted version failed 4.5:1 in the light themes */
   .nav a[aria-current='page'] {
@@ -170,9 +176,6 @@ const isActive = (p: string) =>
     place-items: center;
     border-radius: var(--btn-radius);
   }
-  .langs a:hover {
-    color: var(--text);
-  }
   .langs a[aria-current='true'] {
     background: var(--accent);
     color: var(--accent-ink);
@@ -184,9 +187,6 @@ const isActive = (p: string) =>
     height: 40px;
     color: var(--muted);
     border-radius: var(--btn-radius);
-  }
-  .icon-link:hover {
-    color: var(--accent);
   }
 
   .menu {
@@ -210,7 +210,7 @@ const isActive = (p: string) =>
     width: 20px;
     height: 2px;
     background: var(--text);
-    transition: transform 0.2s;
+    transition: transform 150ms ease-out;
   }
   .menu[open] summary span:first-child {
     transform: translateY(4px) rotate(45deg);
@@ -228,14 +228,21 @@ const isActive = (p: string) =>
     border: 1px solid var(--line-strong);
     border-radius: var(--radius);
     padding: 8px;
+    /* the header is sticky, so a panel taller than a short window (200% zoom, phone in
+       landscape) could never be scrolled into view */
+    max-height: calc(100dvh - 86px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
   .menu-panel a {
     font-size: 1rem;
     padding: 12px 14px;
     border-radius: var(--radius);
   }
+  /* same solid fill as the desktop nav: a text tint alone told pages apart by color only */
   .menu-panel a[aria-current='page'] {
-    color: var(--accent);
+    color: var(--accent-ink);
+    background: var(--accent);
   }
 
   @media (max-width: 1060px) {
@@ -261,6 +268,12 @@ const isActive = (p: string) =>
     }
     .bar {
       gap: 8px;
+    }
+  }
+  /* at 320px the bar overflowed by 1px and the page scrolled sideways */
+  @media (max-width: 360px) {
+    .langs {
+      margin-right: 0;
     }
   }
 </style>

@@ -3,7 +3,7 @@
 // so it renders in that brand's colors and fonts inside the Drakaris shell.
 import { useT, type Lang } from '../i18n/ui';
 import { href } from '../lib/site';
-import { derived, gridSrcset, hasImage, tokenTitle, type Group } from '../lib/collection';
+import { derived, gridSrcset, hasImage, type Group } from '../lib/collection';
 import { flagshipInfo } from '../content/flagships';
 
 interface Props {
@@ -19,6 +19,8 @@ const accentFallback = group.members[0]?.accent;
 ---
 
 <a class="group-card" href={href(lang, `collections/${group.slug}`)} data-theme={info?.theme} style={!info ? `--accent:${accentFallback}` : undefined}>
+  <!-- covers are decorative: the group name and count are text in this same link, and four
+       token titles read before them buried the link name (same choice as NftCard) -->
   <div class={`covers n${covers.length}`}>
     {
       covers.map(({ col, token }) => (
@@ -26,7 +28,7 @@ const accentFallback = group.members[0]?.accent;
           src={derived(col, token, 'grid')}
           srcset={gridSrcset(col, token)}
           sizes="(max-width: 600px) 45vw, 170px"
-          alt={tokenTitle(col, token)}
+          alt=""
           width="600"
           height="600"
           loading={(index ?? 9) < 6 ? 'eager' : 'lazy'}
@@ -54,12 +56,14 @@ const accentFallback = group.members[0]?.accent;
     border-radius: var(--radius);
     overflow: hidden;
     font-family: var(--font-sans);
-    transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+    transition: transform 150ms ease-out, border-color 150ms ease-out, box-shadow 150ms ease-out;
   }
-  .group-card:hover {
-    transform: translateY(-4px);
-    border-color: var(--outline, var(--accent));
-    box-shadow: var(--shadow-hover);
+  @media (hover: hover) {
+    .group-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--outline, var(--accent));
+      box-shadow: var(--shadow-hover);
+    }
   }
   .covers {
     display: grid;
