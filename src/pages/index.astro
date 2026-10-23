@@ -15,7 +15,10 @@ const fallback = `${base}/${DEFAULT_LANG}/`;
     <title>Drakaris</title>
     <meta name="robots" content="noindex" />
     <link rel="canonical" href={fallback} />
-    <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.svg`} type="image/svg+xml" />
+    <!-- head of the pinned lion, built by scripts/brand-images.mjs -->
+    <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.ico`} sizes="32x32 48x48" />
+    <link rel="icon" href={`${import.meta.env.BASE_URL}favicon-32.png`} type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href={`${import.meta.env.BASE_URL}apple-touch-icon.png`} />
     <script is:inline define:vars={{ base, langs: LANGS, fallback }}>
       var pick = (navigator.languages || [navigator.language || ''])
         .map(function (l) { return l.toLowerCase().slice(0, 2); })
