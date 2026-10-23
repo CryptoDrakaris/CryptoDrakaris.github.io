@@ -158,6 +158,9 @@ const website = info?.links.website;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     transform: rotate(-3deg);
+    /* own layer: drawn upright, then rotated as a whole, so tile edges are smoothed evenly
+       instead of stepping into a dashed line every ~19px at 3 degrees */
+    will-change: transform;
   }
   .mosaic.n1,
   .mosaic.n2 {
@@ -167,7 +170,12 @@ const website = info?.links.website;
     display: block;
     border-radius: var(--radius);
     overflow: hidden;
-    border: 1px solid var(--line-strong);
+    /* calm line, not --line-strong (that one is tuned to 3:1 for buttons and made the
+       tilted edges loud); cartoon themes keep their black outline */
+    border: 1px solid var(--outline, var(--line));
+    /* fill under the border with its own color: the seam between border and image no
+       longer lets the page background show through as a colored fringe */
+    background: var(--outline, var(--line));
     aspect-ratio: 1;
   }
   .tile img {
@@ -287,6 +295,7 @@ const website = info?.links.website;
     }
     .mosaic {
       transform: none;
+      will-change: auto;
       margin-bottom: 28px;
     }
   }
