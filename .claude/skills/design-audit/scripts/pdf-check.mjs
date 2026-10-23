@@ -60,6 +60,11 @@ function analyse(buf) {
     if (name) fonts.set(name, { ...(fonts.get(name) || {}), embedded: emb });
   }
   for (const [n, f] of fonts) if (f.sub === 'Type3') f.embedded = true;
+  // a descriptor without a font file is fine when a Type3 font uses it: Type3 glyphs are drawn
+  // in the PDF itself (Canva exports some fonts this way)
+  const type3Descriptors = new Set([...raw.matchAll(/\/Subtype\s*\/Type3[\s\S]{0,1500}?\/FontDescriptor\s+(\d+)\s+0\s+R/g)].map((m) => m[1]));
+  for (const m of raw.matchAll(/(\d+)\s+0\s+obj\s*<<[\s\S]{0,300}?\/Type\s*\/FontDescriptor[\s\S]{0,800}?\/FontName\s*\/([^\s/<>\[\]]+)/g))
+    if (type3Descriptors.has(m[1]) && fonts.has(m[2])) fonts.get(m[2]).embedded = true;
   info.fonts = [...fonts].map(([n, f]) => `${n}${f.embedded ? '' : f.embedded === false ? ' (not embedded)' : ''}`);
   info.images = [...all.matchAll(/\/Subtype\s*\/Image\b[\s\S]{0,400}?>>/g)].map((m) => {
     const w = +(m[0].match(/\/Width\s+(\d+)/)?.[1] || 0), h = +(m[0].match(/\/Height\s+(\d+)/)?.[1] || 0);
@@ -72,7 +77,8 @@ function analyse(buf) {
     }
   }
   info.textStreams = textOps;
-  info.tagged = /\/MarkInfo\s*<<[^>]*\/Marked\s+true/.test(all) && /\/StructTreeRoot\s+\d+\s+\d+\s+R/.test(all);
+  // MarkInfo may be inline or a reference to an object holding /Marked true
+  info.tagged = /\/Marked\s+true/.test(all) && /\/StructTreeRoot\s+\d+\s+\d+\s+R/.test(all);
   info.lang = all.match(/\/Lang\s*\(([^)]*)\)/)?.[1] || null;
   // text strings are PDFDocEncoding or UTF-16BE with a byte order mark (þÿ)
   const pdfString = (s) => {

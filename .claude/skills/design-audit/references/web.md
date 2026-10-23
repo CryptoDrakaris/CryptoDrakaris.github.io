@@ -5,9 +5,9 @@
 Источники:
 - разделы 1–8: ui-ux-pro-max-skill (`references/quick-reference.md`, `data/ux-guidelines.csv`, `data/stacks/*.csv`), MIT License, Copyright (c) 2024 Next Level Builder. Отобраны и переписаны правила для веба;
 - раздел «Шаблонность и вкус» (теперь `taste.md`): taste-skill (`skills/taste-skill/SKILL.md`, `skills/redesign-skill/SKILL.md`), MIT License, Copyright (c) 2026 Leonxlnx. Отобраны правила, не привязанные к стеку и не спорящие с каноном бренда;
-- правила с пометкой ⓙ: jakubkrehel/skills (`skills/better-*/`), MIT License, Copyright (c) 2026 Jakub Krehel. Пересказаны своими словами и проверены на этом проекте 2026-10-22: каждое из них нашло реальную ошибку, которую свод до этого пропускал;
+- правила с пометкой ⓙ: jakubkrehel/skills (`skills/better-*/`), MIT License, Copyright (c) 2026 Jakub Krehel. Пересказаны своими словами и проверены на реальном сайте 2026-10-22: каждое из них нашло реальную ошибку, которую свод до этого пропускал;
 - правила с пометкой Ⓐ: плагин Anthropic «Design» (`anthropics/knowledge-work-plugins`, `design/skills/*`) и `anthropics/skills` (`webapp-testing`), Apache License 2.0, © Anthropic, PBC. Пересказаны и изменены, нормы сверены с WCAG 2.2;
-- разделы 9 и 10 добавлены для этого проекта.
+- разделы 9 и 10 добавлены для этого скила.
 
 **Способ проверки:** [S] – `audit-static.mjs`, [B] – `browser-checks.js` или браузер вручную, [C] – чтение кода, [V] – визуально по скриншотам.
 

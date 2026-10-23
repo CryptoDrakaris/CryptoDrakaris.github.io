@@ -11,7 +11,7 @@ description: Аудит готового дизайна в любом форма
 
 - без пометки – правила этого скила, в том числе из [ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) (MIT, © 2024 Next Level Builder), отобранные для веба;
 - раздел вкуса – [taste-skill](https://github.com/Leonxlnx/taste-skill) (MIT, © 2026 Leonxlnx);
-- ⓙ – [jakubkrehel/skills](https://github.com/jakubkrehel/skills), скилы `better-*` (MIT, © 2026 Jakub Krehel): каждое правило нашло на сайте этого проекта ошибку, которую свод до того пропускал;
+- ⓙ – [jakubkrehel/skills](https://github.com/jakubkrehel/skills), скилы `better-*` (MIT, © 2026 Jakub Krehel): каждое правило нашло на реальном сайте ошибку, которую свод до того пропускал;
 - Ⓐ – плагин Anthropic «Design» ([knowledge-work-plugins](https://github.com/anthropics/knowledge-work-plugins), `design/`) и [anthropics/skills](https://github.com/anthropics/skills) (`frontend-design`, `canvas-design`, `slack-gif-creator`, `webapp-testing`), Apache License 2.0, © Anthropic, PBC. Скил не одобрен Anthropic и не связан с ней;
 - ⓓ – встроенный скил Claude Code `dataviz`: лицензия в нём не указана, поэтому правила изложены своими словами, а проверка палитры написана заново по опубликованным формулам.
 
