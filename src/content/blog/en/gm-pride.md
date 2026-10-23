@@ -1,6 +1,6 @@
 ---
 title: 'gm, pride: the site is live'
-description: "Why I built my own corner of the jungle, what's here and what's coming next."
+description: "Why I built my own corner of the jungle, what’s here and what’s coming next."
 date: 2026-09-15
 ---
 
