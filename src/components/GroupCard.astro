@@ -56,13 +56,19 @@ const accentFallback = group.members[0]?.accent;
     border-radius: var(--radius);
     overflow: hidden;
     font-family: var(--font-sans);
-    transition: transform 150ms ease-out, border-color 150ms ease-out, box-shadow 150ms ease-out;
+    transition: transform 150ms ease-out, box-shadow 150ms ease-out;
   }
+  /* hover is a lift only, the border keeps its color: an accent border showed on Lazy Lions
+     alone, the cartoon brands keep their black outline, invisible on the dark shell */
   @media (hover: hover) {
     .group-card:hover {
-      transform: translateY(-4px);
-      border-color: var(--outline, var(--accent));
+      transform: translateY(-8px);
       box-shadow: var(--shadow-hover);
+    }
+  }
+  @media (hover: hover) and (prefers-reduced-motion: reduce) {
+    .group-card:hover {
+      transform: none;
     }
   }
   .covers {
