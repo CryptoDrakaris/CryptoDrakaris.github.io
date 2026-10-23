@@ -22,7 +22,7 @@ const { t, tn, nf } = useT(lang);
 // она же занимает верхнюю позицию веера (.f0). Дальше по первому токену с картинкой
 // от каждого оставшегося флагмана. Если лев однажды уйдёт из кошелька, веер соберётся
 // как раньше – с первого токена Lazy Lions. Какой токен закреплён – src/content/pinned.json,
-// оттуда же его берёт scripts/og-image.mjs для превью ссылки.
+// оттуда же его берёт scripts/brand-images.mjs для превью ссылки и фавикона.
 
 const firstImaged = (g: (typeof flagships)[number]) => {
   for (const col of g.members) for (const token of col.tokens) if (hasImage(col, token)) return { g, col, token };
@@ -43,7 +43,7 @@ const othersPreview = (others?.members ?? [])
   .flatMap((col) => col.tokens.filter((tok) => hasImage(col, tok)).slice(0, 1).map((token) => ({ col, token })))
   .slice(0, 8);
 const posts = (await postsFor(lang)).slice(0, 3);
-// link preview 1200×630 from scripts/og-image.mjs; while it is missing, the square token image
+// link preview 1200×630 from scripts/brand-images.mjs; while it is missing, the square token image
 const ogImage = pinned && existsSync('public/og/home.jpg') ? asset('og/home.jpg') : fan[0] ? derived(fan[0].col, fan[0].token, 'full') : undefined;
 ---
 
