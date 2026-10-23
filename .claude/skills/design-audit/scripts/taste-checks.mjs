@@ -1,6 +1,6 @@
-// "Шаблонность и вкус" (rules.md, section 11): mechanical checks over built HTML.
+// "Шаблонность и вкус" (references/taste.md): mechanical checks over built HTML.
 // Adapted from taste-skill (MIT, (c) 2026 Leonxlnx). Heuristics, never above MEDIUM.
-// Guards from rules.md apply: brand canon, language typography and the project stack win.
+// Guards from references/taste.md apply: brand canon, language typography and the project stack win.
 
 const VOID = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr']);
 const SKIP_CONTENT = new Set(['script', 'style', 'svg', 'noscript', 'template']);

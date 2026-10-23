@@ -65,7 +65,7 @@ h3 {
      anywhere, not break-word: headings sit in grids, and only anywhere lowers the
      min-content width the grid sizes them by. It splits words mid-letter, so the real fix
      is size and copy that fit (theme --display-scale, short KK words); check with the
-     word-fit scan in web-design-audit */
+     word-fit scan in design-audit */
   overflow-wrap: anywhere;
 }
 h1 {

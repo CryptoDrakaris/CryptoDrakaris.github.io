@@ -7,7 +7,7 @@
 // В jsdom нет движка раскладки, поэтому такие правила выключены – они остаются
 // за scripts/browser-checks.js в настоящем браузере.
 //
-// Запуск: node .claude/skills/web-design-audit/scripts/axe-static.mjs <папка-сборки> [--json] [--limit 40]
+// Запуск: node .claude/skills/design-audit/scripts/axe-static.mjs <папка-сборки> [--json] [--limit 40]
 // Зависимости: axe-core и jsdom в devDependencies проверяемого проекта.
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
