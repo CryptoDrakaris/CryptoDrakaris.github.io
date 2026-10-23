@@ -3,8 +3,9 @@
 // - Link preview for the home page: 1200×630 (1.91:1), the size social networks and messengers
 //   expect for og:image. The token sits in the centre, so a square crop (avatars, some
 //   messengers) keeps it whole. No text: SVG text would render in the build machine's fonts.
-// - Favicons: the head with the cap (faviconCrop), because the whole lion is a blur at 16px.
-// Writes public/og/home.jpg, public/favicon-32.png, public/favicon.ico, public/apple-touch-icon.png.
+// - Favicons: rendered from public/favicon.svg (the owner's "D" for Drakaris), so the .ico,
+//   PNG and home screen icon match the SVG tab icon. The lion's head was tried and dropped.
+// Writes public/og/home.jpg, public/favicon.ico, public/apple-touch-icon.png.
 // Usage: node scripts/brand-images.mjs
 import sharp from 'sharp';
 import { mkdir, readFile, writeFile, access } from 'node:fs/promises';
@@ -57,18 +58,11 @@ await sharp(bg)
 console.log(`brand-images: ${pinned.collection} #${pinned.tokenId} -> public/og/home.jpg (${W}×${H})`);
 
 // ---------- favicons ----------
-const meta = await sharp(src).metadata();
-const c = pinned.faviconCrop ?? { left: 0, top: 0, size: 1 };
-const side = Math.round(c.size * meta.width);
-const head = { left: Math.round(c.left * meta.width), top: Math.round(c.top * meta.height), width: side, height: side };
-const tab = async (px) => {
-  const r = Math.round(px * 0.18); // rounded like the old icon, transparent corners
-  const mask = Buffer.from(`<svg width="${px}" height="${px}"><rect width="${px}" height="${px}" rx="${r}" ry="${r}"/></svg>`);
-  return sharp(src).extract(head).resize(px, px, { kernel: 'lanczos3' }).composite([{ input: mask, blend: 'dest-in' }]).png().toBuffer();
-};
+const svgIcon = await readFile(path.join(ROOT, 'public/favicon.svg'));
+const tab = (px) => sharp(svgIcon, { density: Math.ceil((72 * px) / 64) * 4 }).resize(px, px).png().toBuffer();
 const png32 = await tab(32);
 const png48 = await tab(48);
-await sharp(png32).toFile(path.join(ROOT, 'public/favicon-32.png'));
+
 
 // .ico for browsers and crawlers that ask for /favicon.ico: an ICO directory holding PNG images
 const ico = (images) => {
@@ -91,6 +85,6 @@ const ico = (images) => {
 await writeFile(path.join(ROOT, 'public/favicon.ico'), ico([{ px: 32, data: png32 }, { px: 48, data: png48 }]));
 
 // home screen icon: iOS rounds it itself and paints transparency black, so square and opaque
-await sharp(src).extract(head).resize(180, 180, { kernel: 'lanczos3' }).flatten({ background: BG }).png().toFile(path.join(ROOT, 'public/apple-touch-icon.png'));
-console.log(`brand-images: favicons from the head of ${pinned.collection} #${pinned.tokenId} -> favicon-32.png, favicon.ico, apple-touch-icon.png`);
+await sharp(svgIcon, { density: 864 }).resize(180, 180).flatten({ background: '#080a0c' }).png().toFile(path.join(ROOT, 'public/apple-touch-icon.png'));
+console.log('brand-images: favicons from public/favicon.svg -> favicon.ico, apple-touch-icon.png');
 

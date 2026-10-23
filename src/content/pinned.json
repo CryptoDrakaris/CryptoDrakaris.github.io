@@ -1,11 +1,5 @@
 {
   "collection": "lazy-lions",
   "tokenId": "4846",
-  "note": "Owner’s favourite token: first card of the home fan (src/pages/[lang]/index.astro), the link preview and the favicon (scripts/brand-images.mjs).",
-  "faviconCrop": {
-    "left": 0.25,
-    "top": 0.1125,
-    "size": 0.5125,
-    "why": "head with the cap: the whole lion is a blur at 16px"
-  }
+  "note": "Owner’s favourite token: first card of the home fan (src/pages/[lang]/index.astro) and the link preview (scripts/brand-images.mjs)."
 }

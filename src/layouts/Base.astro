@@ -47,9 +47,9 @@ function hexRgb(h: string) {
     <title>{fullTitle}</title>
     <meta name="description" content={desc} />
     <meta name="theme-color" content={THEME_COLOR[theme]} />
-    <!-- head of the pinned lion, built by scripts/brand-images.mjs -->
+    <!-- the owner's "D"; .ico, PNG and home screen icon are rendered from this SVG by scripts/brand-images.mjs -->
+    <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.svg`} type="image/svg+xml" />
     <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.ico`} sizes="32x32 48x48" />
-    <link rel="icon" href={`${import.meta.env.BASE_URL}favicon-32.png`} type="image/png" sizes="32x32" />
     <link rel="apple-touch-icon" href={`${import.meta.env.BASE_URL}apple-touch-icon.png`} />
     {Astro.site && <link rel="canonical" href={abs(Astro.url.pathname)} />}
     {LANGS.map((l) => <link rel="alternate" hreflang={l} href={abs(`${base}/${l}${rest}`)} />)}

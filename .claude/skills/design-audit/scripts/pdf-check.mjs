@@ -1,16 +1,19 @@
 #!/usr/bin/env node
 // PDF accessibility and print-readiness check by structure. Node 18+, no dependencies.
-// Usage: node pdf-check.mjs <file.pdf>... [--json]
+// Usage: node pdf-check.mjs <file.pdf>... [--json] [--extract-images <dir>]
+// --extract-images writes embedded JPEG images (DCTDecode) as files: when pages are flat
+// images (exported slides, scans) they can be reviewed by eye without a PDF renderer.
 // Rules: documents.md (doc-text-layer, doc-fonts-embedded, doc-tagged, doc-meta, doc-links,
 // doc-print-ready). Reads the raw file and inflates Flate streams (including object streams),
 // so it sees dictionaries that compressed PDFs hide. It does not render: glyphs that are
 // embedded but missing from the font (squares instead of letters) must be checked by eye.
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { inflateSync } from 'node:zlib';
-import { basename } from 'node:path';
+import { basename, join } from 'node:path';
 
 const args = process.argv.slice(2);
-const files = args.filter((a) => !a.startsWith('--'));
+const extractDir = args.includes('--extract-images') ? args[args.indexOf('--extract-images') + 1] : null;
+const files = args.filter((a, i) => !a.startsWith('--') && args[i - 1] !== '--extract-images');
 if (!files.length) {
   console.error('Usage: node pdf-check.mjs <file.pdf>... [--json]');
   process.exit(2);
@@ -72,13 +75,32 @@ function analyse(buf) {
   info.tagged = /\/MarkInfo\s*<<[^>]*\/Marked\s+true/.test(all) && /\/StructTreeRoot\s+\d+\s+\d+\s+R/.test(all);
   info.lang = all.match(/\/Lang\s*\(([^)]*)\)/)?.[1] || null;
   // text strings are PDFDocEncoding or UTF-16BE with a byte order mark (þÿ)
-  const pdfString = (s) => (s && s.startsWith('\xfe\xff') ? Buffer.from(s.slice(2), 'latin1').swap16().toString('utf16le') : s);
-  info.title = pdfString(all.match(/\/Title\s*\(([^)]*)\)/)?.[1]) || all.match(/<dc:title>[\s\S]*?<rdf:li[^>]*>([^<]*)</)?.[1] || null;
+  const pdfString = (s) => {
+    if (!s) return s;
+    if (s.startsWith('\xfe\xff')) return Buffer.from(s.slice(2), 'latin1').swap16().toString('utf16le');
+    const utf8 = Buffer.from(s, 'latin1').toString('utf8'); // some exporters write raw UTF-8 bytes
+    return /[^\x00-\x7f]/.test(s) && !utf8.includes('\ufffd') ? utf8 : s;
+  };
+  info.title = pdfString(all.match(/\/Title\s*\(([^)]*)\)/)?.[1]) || pdfString(all.match(/<dc:title>[\s\S]*?<rdf:li[^>]*>([^<]*)</)?.[1]) || null; // XMP is UTF-8 read as latin1
   info.displayTitle = /\/DisplayDocTitle\s+true/.test(all);
   info.links = (all.match(/\/Subtype\s*\/Link\b/g) || []).length;
   info.figuresWithAlt = (all.match(/\/S\s*\/Figure[\s\S]{0,300}?\/Alt\s*\(/g) || []).length;
   info.figures = (all.match(/\/S\s*\/Figure\b/g) || []).length;
   info.streams = { inflated: flate, failed };
+  // OCR engines (Tesseract, macOS Preview) draw recognised text invisibly in a "GlyphLessFont"
+  info.ocrLayer = info.fonts.some((n) => /glyph ?less/i.test(n));
+  info.imagePages = info.images.length >= info.pages && info.pages > 0 && info.fonts.length <= 1;
+  if (extractDir) {
+    mkdirSync(extractDir, { recursive: true });
+    let k = 0;
+    for (const m of raw.matchAll(/<<((?:(?!<<)[\s\S]){0,800}?\/Subtype\s*\/Image[\s\S]{0,800}?)>>\s*stream\r?\n/g)) {
+      if (!/\/DCTDecode/.test(m[1])) continue;
+      const start = m.index + m[0].length;
+      const end = raw.indexOf('\xff\xd9', start) + 2; // JPEG end-of-image marker
+      writeFileSync(join(extractDir, `image-${String(++k).padStart(3, '0')}.jpg`), buf.subarray(start, end));
+    }
+    info.extracted = k;
+  }
   return info;
 }
 
@@ -90,6 +112,7 @@ for (const f of files) {
   try {
     info = analyse(readFileSync(f));
     if (info.encrypted) add('INFO', 'doc-meta', 'encrypted: content streams may be unreadable, results are partial');
+    if (info.ocrLayer && info.imagePages) add('WARN', 'doc-text-layer', `every page is a picture (${info.images.length} images on ${info.pages} pages) with an invisible OCR text layer: text is not real, search and copy depend on recognition quality, the file is heavy; export text as text from the source`);
     if (!info.fonts.length && info.images.length) add('FAIL', 'doc-text-layer', 'no fonts but images present: looks like a scan without OCR, text cannot be selected, searched or read aloud');
     else if (!info.textStreams && !info.fonts.length) add('FAIL', 'doc-text-layer', 'no text found');
     const notEmb = info.fonts.filter((n) => n.endsWith('(not embedded)'));
