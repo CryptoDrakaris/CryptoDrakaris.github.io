@@ -212,8 +212,12 @@ const posts = (await postsFor(lang)).slice(0, 3);
     overflow: hidden;
     border: 3px solid var(--accent);
     box-shadow: 0 20px 50px rgb(0 0 0 / 0.55);
-    background: var(--bg);
+    /* fill under the border with the border color, so its antialiased inner edge blends
+       into the frame, not into the dark page */
+    background: var(--accent);
     transition: transform 150ms ease-out;
+    /* tilted cards on their own layer: edges smoothed evenly while rotated */
+    will-change: transform;
   }
   .fan-card img {
     width: 100%;
