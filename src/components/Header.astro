@@ -174,7 +174,8 @@ const isActive = (p: string) =>
     min-height: 40px;
     display: grid;
     place-items: center;
-    border-radius: var(--btn-radius);
+    /* concentric with .langs: its radius minus 3px padding and 1px border */
+    border-radius: max(0px, calc(var(--btn-radius) - 4px));
   }
   .langs a[aria-current='true'] {
     background: var(--accent);

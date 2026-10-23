@@ -121,6 +121,12 @@ p {
   font-size: calc(clamp(3rem, 8vw, 6rem) * var(--display-scale));
   line-height: var(--display-leading);
 }
+/* Cyrillic caps carry marks above and below (Й, Ё, Қ, Ұ): the tight caps leading of the
+   uppercase brands made them touch the next line */
+:lang(ru) .display-xl,
+:lang(kk) .display-xl {
+  line-height: max(var(--display-leading), 1);
+}
 
 /* ---------- sections ---------- */
 .section {
@@ -306,6 +312,9 @@ p {
 ::view-transition-group(nft-art) {
   animation-duration: 0.4s;
   animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* both ends are rounded by their frames; the snapshot in flight is not */
+  border-radius: var(--radius);
+  overflow: clip;
 }
 /* карточка квадратная, а большая картинка может быть вытянутой: обрезаем, а не сплющиваем */
 ::view-transition-old(nft-art),

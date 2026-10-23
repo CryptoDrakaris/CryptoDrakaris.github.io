@@ -64,7 +64,7 @@
   --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
   --display-weight: 700;
   --display-tracking: -0.035em;
-  --display-leading: 0.98;
+  --display-leading: 1; /* lowercase titles: below 1 descenders touch the next line */
   --display-scale: 1;
   --radius: 6px;
   --btn-radius: 6px;
@@ -173,7 +173,7 @@
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
   --display-weight: 900;
   --display-tracking: -0.02em;
-  --display-leading: 0.95;
+  --display-leading: 1; /* lowercase titles: below 1 descenders touch the next line */
   --display-scale: 0.95;
   --display-shadow: -4px 4px 0 #f9e174;
   --radius: 8px;
@@ -206,6 +206,9 @@
   --font-display: 'Anton', 'Oswald Variable', system-ui, sans-serif;
   --font-sans: 'Space Grotesk Variable', 'Onest Variable', system-ui, sans-serif;
   --font-mono: 'Space Mono', 'JetBrains Mono Variable', ui-monospace, monospace;
+  /* Anton ships only 400: card titles and buttons ask the display font for 700, and the
+     browser smeared a fake bold over it. Anton is already heavy, so draw it as is */
+  font-synthesis-weight: none;
   --display-weight: 400;
   --display-tracking: 0.01em;
   --display-leading: 0.95;

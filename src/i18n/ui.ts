@@ -26,7 +26,7 @@ const en = {
   'nav.skip': 'Skip to content',
 
   'home.eyebrow': 'Collector · Holder · Community',
-  'home.title.1': "gm, I'm",
+  'home.title.1': "gm, I’m",
   'home.title.2': 'Drakaris.',
   'home.lead': 'I collect NFTs on Ethereum. Lazy Lions were my first love, and a whole zoo has gathered around them since.',
   'home.cta.collections': 'Explore collections',
@@ -51,7 +51,7 @@ const en = {
   'join.lead': 'Into NFTs and web3? Follow me on X and TikTok: threads, videos and fresh finds from the wallet.',
 
   'collections.eyebrow': 'Collections',
-  'collections.title': "Everything I've collected",
+  'collections.title': "Everything I’ve collected",
   'collections.lead': '{tokens} in {collections}. Flagships first, then the rest.',
   'collections.open': 'Open',
 
@@ -74,7 +74,7 @@ const en = {
   'others.jump': 'Jump to collection',
 
   'about.eyebrow': 'About',
-  'about.title': "Hi, I'm Drakaris.",
+  'about.title': "Hi, I’m Drakaris.",
   'about.lead': 'NFT collector, Lazy Lions holder and a regular in the web3 crowd. Online I go by @cryptodrakaris.',
   'about.me.title': 'Me',
   'about.me.text': 'I post about NFTs, web3 and collecting on X and TikTok. This site is where it all comes together: the collection, my notes and the communities I hang out in.',
@@ -111,9 +111,9 @@ const en = {
   'token.lost': 'This image is lost: the project’s server is gone and no copy survived.',
   'token.nav': 'Token navigation',
   'token.source': 'Image source',
-  'token.source.archive': "Web archive copy of the project's own file",
+  'token.source.archive': "Web archive copy of the project’s own file",
   'token.source.marketplace': 'Marketplace copy, re-encoded',
-  'token.sourceNote': "The project's servers are gone, so this image is rescued from elsewhere and self-hosted.",
+  'token.sourceNote': "The project’s servers are gone, so this image is rescued from elsewhere and self-hosted.",
   'token.prev': 'Previous',
   'token.next': 'Next',
 

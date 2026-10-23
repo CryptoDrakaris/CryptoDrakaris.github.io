@@ -97,7 +97,8 @@ const { t, tn } = useT(lang);
   .dot {
     width: 56px;
     height: 56px;
-    border-radius: calc(var(--radius) - 4px);
+    /* concentric with the row: its radius minus 8px padding and 1px border */
+    border-radius: max(0px, calc(var(--radius) - 9px));
     object-fit: cover;
   }
   .dot {
