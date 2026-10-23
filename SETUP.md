@@ -71,7 +71,7 @@ npm run archive  # личный архив: оригиналы со всех с�
 Проверка доступности перед публикацией (нужны зависимости проекта, ставятся через `npm install`):
 
 ```bash
-node .claude/skills/web-design-audit/scripts/axe-static.mjs dist --limit 600
+node .claude/skills/design-audit/scripts/axe-static.mjs dist --limit 600
 ```
 
 ## Личный архив по всем сетям
@@ -126,5 +126,5 @@ git checkout -- .   # вернуть файлы как в последнем к�
 
 - `CLAUDE.md` – все решения по проекту: структура, темы, каноны брендов, правила сбора коллекции. Клод читает этот файл автоматически.
 - `README.md` – краткое описание и порядок публикации.
-- `.claude/skills/web-design-audit` – проектный скил проверки дизайна.
+- `.claude/skills/design-audit` – проектный скил проверки дизайна.
 - `.github/workflows/deploy.yml` – автоматическая публикация на GitHub Pages.
