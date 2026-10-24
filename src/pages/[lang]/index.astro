@@ -73,7 +73,7 @@ const ogImage = pinned && existsSync('public/og/home.jpg') ? asset('og/home.jpg'
                 alt={tokenTitle(col, token)}
                 width="600"
                 height="600"
-                loading={i < 3 ? 'eager' : 'lazy'}
+                loading="eager"
               />
               <span class="fan-name">{g.name}</span>
             </a>

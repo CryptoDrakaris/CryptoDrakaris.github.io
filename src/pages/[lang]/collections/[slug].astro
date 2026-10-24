@@ -65,7 +65,7 @@ const website = info?.links.website;
                 alt={tokenTitle(col, token)}
                 width="600"
                 height="600"
-                loading={i < 3 ? 'eager' : 'lazy'}
+                loading="eager"
                 fetchpriority={i === 0 ? 'high' : undefined}
               />
             </a>
