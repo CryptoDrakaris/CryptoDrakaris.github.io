@@ -4,6 +4,8 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { DEFAULT_LANG, LANGS, LOCALE, useT, type Lang } from '../i18n/ui';
 import { THEME_COLOR, type ThemeKey } from '../lib/themes';
+import { asset } from '../lib/site';
+import { existsSync } from 'node:fs';
 
 interface Props {
   lang: Lang;
@@ -17,7 +19,9 @@ interface Props {
   accent?: string;
 }
 
-const { lang, title, description, image, theme = 'drakaris', brand, accent } = Astro.props;
+const { lang, title, description, image: ownImage, theme = 'drakaris', brand, accent } = Astro.props;
+// pages without their own picture (gallery, blog, contacts) share the home link preview, 1200×630
+const image = ownImage ?? (existsSync('public/og/home.jpg') ? asset('og/home.jpg') : undefined);
 const { t } = useT(lang);
 const siteName = 'Drakaris';
 const fullTitle = title ? `${title} · ${siteName}` : `${siteName} – ${t('meta.tagline')}`;

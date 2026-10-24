@@ -10,7 +10,7 @@ const lang = Astro.params.lang as Lang;
 const { t } = useT(lang);
 // traits only make sense inside one collection
 const traitsByCollection = collections.map((col) => ({ col, traits: traitIndex([col]) })).filter((x) => x.traits.length > 0);
-let eagerLeft = 4;
+let eagerLeft = 10; // a 1440px window shows two rows of five before any scroll
 ---
 
 <Base lang={lang} title={t('gallery.title')}>
