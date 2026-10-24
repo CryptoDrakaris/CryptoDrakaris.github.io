@@ -7,7 +7,7 @@
 
 | Программа | Версия | Где взять |
 |---|---|---|
-| Node.js | 22 или новее (проект собран на 22.23.2) | https://nodejs.org – кнопка LTS |
+| Node.js | 22 или новее (проект собран на 22.23.2) | Windows: https://nodejs.org – кнопка LTS; Mac: см. раздел «Mac» |
 | Git | любая свежая | https://git-scm.com/downloads |
 
 Больше ничего не нужно: ни ключей API, ни платных сервисов, ни Python.
@@ -17,6 +17,37 @@
 ```bash
 node -v && npm -v && git --version
 ```
+
+## Mac
+
+Проверено 2026-09-24 на Mac с Apple Silicon (arm64). Git входит в Command Line Tools, Node ставится через Homebrew (https://brew.sh):
+
+```bash
+brew install node@22
+brew link --force --overwrite node@22
+```
+
+`node@22` по умолчанию не попадает в PATH, `brew link --force` это исправляет. Проверка: `node -v` показывает `v22.x`.
+
+Дальше – **только вариант 1**, в локальную папку вне Proton Drive:
+
+```bash
+mkdir -p ~/Projects && cd ~/Projects
+git clone https://github.com/CryptoDrakaris/CryptoDrakaris.github.io.git drakaris-site
+cd drakaris-site
+npm ci
+npm run dev
+```
+
+Рабочая копия на Mac: `~/Projects/drakaris-site`.
+
+### Почему не папка Proton Drive
+
+На Mac Proton Drive хранит файлы «по требованию»: на диске лежит заглушка, содержимое скачивается при первом обращении. Заглушку видно в `ls -lO` по пометке `dataless`. Для `node_modules` с тысячами мелких файлов это не работает: сборка зависает без вывода и без нагрузки на процессор, Proton Drive не отдаёт даже один файл. Кроме того, `node_modules` из Windows содержит программы под Windows (esbuild, sharp), а у скопированных файлов нет признака исполняемости (`Permission denied` при `npm run`).
+
+- Не удаляйте и не переустанавливайте `node_modules` в папке Proton Drive: изменения уйдут на компьютер с Windows и сломают запуск там.
+- Файлы проекта (`src`, `data`, `public`) в папке Proton Drive скачиваются нормально, их можно читать и сравнивать.
+- Между Mac и Windows проект переносится через `git push` и `git pull`, а не через синхронизацию.
 
 ## Вариант 1. Через GitHub – рекомендую
 
@@ -42,6 +73,8 @@ cd "<путь к папке LAZY_LIONS>"
 npm install
 npm run dev
 ```
+
+Подходит только для Windows. На Mac этот вариант не работает, см. раздел «Mac».
 
 Дождитесь, пока Proton Drive закончит синхронизацию, прежде чем запускать сборку. Если во время работы появляются ошибки вида «файл занят» – поставьте синхронизацию на паузу.
 
@@ -116,11 +149,14 @@ git checkout -- .   # вернуть файлы как в последнем к�
 | Симптом | Что делать |
 |---|---|
 | `Cannot find package 'astro'` или похожее | `npm install` |
-| Ошибки после переноса папки между компьютерами | удалить `node_modules` и выполнить `npm install` заново: внутри лежат программы, собранные под конкретную систему |
+| Ошибки после переноса папки между компьютерами | удалить `node_modules` и выполнить `npm install` заново: внутри лежат программы, собранные под конкретную систему. На Mac – только в локальной копии, не в папке Proton Drive |
 | Порт 4321 занят | `npm run dev -- --port 4322` |
 | Предупреждения `LF will be replaced by CRLF` | не ошибка, так и должно быть на Windows |
 | `npm run fetch` ругается на 429 и часть картинок не скачалась | публичные шлюзы IPFS ограничивают частоту. Повторить позже, скрипт докачивает только недостающее |
 | Сайт собрался, но картинок нет | выполнить `npm run derive` |
+| Mac: `npm run build` или `git status` висят без вывода | вы в папке Proton Drive. Работайте в `~/Projects/drakaris-site`, см. раздел «Mac» |
+| Mac: `sh: .../node_modules/.bin/astro: Permission denied` | то же: `node_modules` пришла с Windows через Proton Drive |
+| Mac: `node: command not found` после `brew install node@22` | `brew link --force --overwrite node@22` |
 
 ## Что ещё лежит в папке
 
