@@ -6,23 +6,42 @@
 // Checks (rules palette-cvd, mark-contrast, color-by-job in charts.md):
 //   - each color against the surface: WCAG ratio, needs >= 3:1 for marks (4.5:1 if used as text);
 //   - colour difference between series as ΔE in OKLab ×100, normal vision >= 15,
-//     simulated protanopia / deuteranopia / tritanopia >= 8 (6–8 warns: add labels or texture);
+//     simulated protanopia / deuteranopia >= 8 (6–8 warns: add labels or texture, < 6 fails),
+//     tritanopia (rare) the same 8 to pass but fails only under 4;
 //   - --ordinal: lightness must change monotonically along the list.
+// A dark theme is checked as its own palette against its own --surface.
 // Colour science: OKLab (B. Ottosson, 2020); colour vision deficiency simulation with the
 // severity-1.0 matrices of Machado, Oliveira, Fernandes (2009), applied in linear sRGB.
+// Levels: OK, WARN, FAIL, INFO and N/A – the rule had nothing to check (one colour, no --surface):
+// N/A is not a pass, report it apart from OK.
 // Exit code: 0 clean, 1 at least one FAIL, 2 bad input.
 
-const args = process.argv.slice(2);
-const flag = (name) => args.includes(name);
-const opt = (name, def) => {
-  const i = args.indexOf(name);
-  return i >= 0 && args[i + 1] ? args[i + 1] : def;
-};
-const list = args.find((a) => !a.startsWith('--') && args[args.indexOf(a) - 1] !== '--surface' && args[args.indexOf(a) - 1] !== '--pairs');
-if (!list) {
-  console.error('Usage: node palette-check.mjs "#hex,#hex,..." [--surface "#hex"] [--pairs adjacent|all] [--ordinal] [--json]');
+const USAGE = 'Usage: node palette-check.mjs "#hex,#hex,..." [--surface "#hex"] [--pairs adjacent|all] [--ordinal] [--json]';
+const usage = (msg) => {
+  console.error(`${msg ? `Error: ${msg}\n` : ''}${USAGE}`);
   process.exit(2);
+};
+const args = process.argv.slice(2);
+const flags = new Set();
+const opts = {};
+let list = null;
+for (let i = 0; i < args.length; i++) {
+  const a = args[i];
+  if (a === '--json' || a === '--ordinal') flags.add(a);
+  else if (a === '--surface' || a === '--pairs') {
+    if (!args[i + 1] || args[i + 1].startsWith('--')) usage(`${a} needs a value`);
+    opts[a] = args[++i];
+  } else if (a === '--help' || a === '-h') {
+    console.log(USAGE);
+    process.exit(0);
+  } else if (a.startsWith('--')) usage(`unknown option ${a}`);
+  else if (list) usage(`one comma-separated list of colours (got "${list}" and "${a}")`);
+  else list = a;
 }
+const flag = (name) => flags.has(name);
+const opt = (name, def) => opts[name] ?? def;
+if (!list) usage();
+if (!['adjacent', 'all'].includes(opt('--pairs', 'adjacent'))) usage(`--pairs is adjacent or all, not ${opt('--pairs')}`);
 
 const parseHex = (h) => {
   const m = h.trim().replace(/^#/, '');
@@ -35,9 +54,9 @@ try {
   colors = list.split(',').map((h) => ({ hex: h.trim().toLowerCase(), rgb: parseHex(h) }));
   surface = opt('--surface') ? { hex: opt('--surface').toLowerCase(), rgb: parseHex(opt('--surface')) } : null;
 } catch (e) {
-  console.error(e.message);
-  process.exit(2);
+  usage(e.message);
 }
+if (colors.length < 2 && !surface) usage('give two or more colours, or one colour with --surface');
 
 const toLinear = (c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
 const lin = (rgb) => rgb.map(toLinear);
@@ -70,10 +89,11 @@ const results = [];
 const add = (level, rule, msg) => results.push({ level, rule, msg });
 
 // one text/background pair
-if (colors.length === 2 && !surface && !flag('--pairs')) {
+if (colors.length === 2 && !surface && !opts['--pairs'] && !flag('--ordinal')) {
   const r = wcag(colors[0].rgb, colors[1].rgb);
-  add(r >= 4.5 ? 'OK' : r >= 3 ? 'WARN' : 'FAIL', 'contrast', `${colors[0].hex} on ${colors[1].hex}: ${r.toFixed(2)}:1 (text needs 4.5, large text and non-text 3)`);
+  add(r >= 4.5 ? 'OK' : r >= 3 ? 'WARN' : 'FAIL', 'color-contrast', `${colors[0].hex} on ${colors[1].hex}: ${r.toFixed(2)}:1 (text needs 4.5, large text and non-text 3)`);
 } else {
+  if (!surface) add('N/A', 'mark-contrast', 'no --surface given: contrast of the colours to their background is not checked');
   if (surface)
     for (const c of colors) {
       const r = wcag(c.rgb, surface.rgb);
@@ -90,9 +110,9 @@ if (colors.length === 2 && !surface && !flag('--pairs')) {
     if (n < 15) add('FAIL', 'palette-cvd', `${a.hex} / ${b.hex}: ΔE ${n.toFixed(1)} with normal vision (needs 15)`);
     for (const k of ['protan', 'deutan', 'tritan']) {
       const d = dE(views[k](a), views[k](b));
-      const need = k === 'tritan' ? 6 : 8; // tritanopia is rare; warn earlier, fail later
-      if (d < 6) add(k === 'tritan' ? 'WARN' : 'FAIL', 'palette-cvd', `${a.hex} / ${b.hex}: ΔE ${d.toFixed(1)} as ${k}opia (needs ${need})`);
-      else if (d < need) add('WARN', 'palette-cvd', `${a.hex} / ${b.hex}: ΔE ${d.toFixed(1)} as ${k}opia – only with direct labels or texture`);
+      const failBelow = k === 'tritan' ? 4 : 6; // tritanopia is rare: the same warning band, a later fail
+      if (d < failBelow) add('FAIL', 'palette-cvd', `${a.hex} / ${b.hex}: ΔE ${d.toFixed(1)} as ${k}opia (needs 8)`);
+      else if (d < 8) add('WARN', 'palette-cvd', `${a.hex} / ${b.hex}: ΔE ${d.toFixed(1)} as ${k}opia – only with direct labels or texture`);
     }
   }
   if (pairsMode === 'all' && colors.length > 4) add('WARN', 'palette-cvd', `${colors.length} colours compared all-to-all: more than 3–4 series are rarely distinguishable on scatter plots and maps`);
@@ -102,9 +122,12 @@ if (colors.length === 2 && !surface && !flag('--pairs')) {
     const down = L.every((v, i) => i === 0 || v < L[i - 1]);
     add(up || down ? 'OK' : 'FAIL', 'color-by-job', `ordinal lightness ${L.map((v) => v.toFixed(2)).join(' → ')} ${up || down ? 'is monotonic' : 'is not monotonic: an ordered scale must go light to dark'}`);
   }
-  if (!flag('--ordinal') && !results.some((r) => r.level !== 'OK')) add('OK', 'palette-cvd', `${pairs.length} pair(s) distinguishable in normal vision and simulated colour blindness`);
+  if (!pairs.length) add('N/A', 'palette-cvd', 'one colour: no pair to tell apart');
+  else if (flag('--ordinal')) add('N/A', 'palette-cvd', 'ordinal scale: neighbours are meant to be close, only the lightness order is checked');
+  if (!flag('--ordinal') && pairs.length && !results.some((r) => r.level !== 'OK' && r.level !== 'N/A')) add('OK', 'palette-cvd', `${pairs.length} pair(s) distinguishable in normal vision and simulated colour blindness`);
 }
 
+results.sort((a, b) => (a.level === 'N/A') - (b.level === 'N/A')); // what was checked first
 if (flag('--json')) console.log(JSON.stringify(results, null, 2));
 else for (const r of results) console.log(`${r.level.padEnd(4)} ${r.rule.padEnd(14)} ${r.msg}`);
 process.exit(results.some((r) => r.level === 'FAIL') ? 1 : 0);
