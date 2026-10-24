@@ -3,7 +3,7 @@ import Base from '../../../layouts/Base.astro';
 import GroupCard from '../../../components/GroupCard.astro';
 import { LANGS, useT, type Lang } from '../../../i18n/ui';
 import { href } from '../../../lib/site';
-import { flagships, others, collections, totalTokens, derived, hasImage } from '../../../lib/collection';
+import { flagships, others, collections, totalTokens, derived, gridSrcset, hasImage } from '../../../lib/collection';
 
 export const getStaticPaths = () => LANGS.map((lang) => ({ params: { lang } }));
 
@@ -37,7 +37,7 @@ const { t, tn } = useT(lang);
               return (
                 <li>
                   <a href={href(lang, `collections/others`) + `#${col.slug}`} style={`--row-accent:${col.accent}`}>
-                    {cover ? <img src={derived(col, cover, 'grid')} alt="" width="56" height="56" loading="lazy" /> : <span class="dot" />}
+                    {cover ? <img src={derived(col, cover, 'grid')} srcset={gridSrcset(col, cover)} sizes="56px" alt="" width="56" height="56" loading="lazy" /> : <span class="dot" />}
                     <span class="name">{col.name}</span>
                     <span class="n mono">{col.tokens.length}</span>
                   </a>

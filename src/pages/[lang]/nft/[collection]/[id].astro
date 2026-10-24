@@ -37,6 +37,15 @@ const info = group.kind === 'flagship' ? flagshipInfo(group.slug) : undefined;
 const title = tokenTitle(col, token);
 // collections that name every token the same ("To Ethereum, with Love") need the id to stay unique
 const pageTitle = title.includes('#') ? title : `${title} #${shortId(token.tokenId)}`;
+// Pager links show the number the next page is titled with, and their accessible name starts
+// contains that same text (WCAG 2.5.3): Bubblegum Kid #3296 lives at /838/, so the token id alone
+// would not match the name a voice-control user reads on the link.
+const pager = (dir: string, other: Token) => {
+  const name = tokenTitle(col, other);
+  const num = name.match(/#\s*([^\s#]+)\s*$/)?.[1];
+  const shown = `#${num ?? shortId(other.tokenId)}`;
+  return { shown, label: name.includes(shown) ? `${dir}: ${name}` : `${dir}: ${name} ${shown}` };
+};
 const imaged = hasImage(col, token);
 const full = imaged ? derived(col, token, 'full') : null;
 const size = fullSize(col, token);
@@ -71,8 +80,8 @@ const description = token.description && token.description.trim() !== col.name &
       {
         col.tokens.length > 1 && (
           <span class="pager">
-            <a href={href(lang, tokenPath(col, prev))} aria-label={`${t('token.prev')}: ${tokenTitle(col, prev)}`}>← #{shortId(prev.tokenId)}</a>
-            <a href={href(lang, tokenPath(col, next))} aria-label={`${t('token.next')}: ${tokenTitle(col, next)}`}>#{shortId(next.tokenId)} →</a>
+            <a href={href(lang, tokenPath(col, prev))} aria-label={pager(t('token.prev'), prev).label}>← {pager(t('token.prev'), prev).shown}</a>
+            <a href={href(lang, tokenPath(col, next))} aria-label={pager(t('token.next'), next).label}>{pager(t('token.next'), next).shown} →</a>
           </span>
         )
       }

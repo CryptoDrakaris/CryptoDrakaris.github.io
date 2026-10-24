@@ -83,6 +83,31 @@ const isActive = (p: string) =>
   </div>
 </header>
 
+<script>
+  // The menu is a <details>: Esc closes it and returns focus to its button, and a tap outside
+  // closes it without following whatever lay under the finger (escape-routes).
+  const menu = document.querySelector<HTMLDetailsElement>('.site-header .menu');
+  if (menu) {
+    const close = (focus: boolean) => {
+      menu.open = false;
+      if (focus) menu.querySelector('summary')?.focus();
+    };
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menu.open) close(menu.contains(document.activeElement));
+    });
+    document.addEventListener(
+      'click',
+      (e) => {
+        if (!menu.open || menu.contains(e.target as Node)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        close(false);
+      },
+      true,
+    );
+  }
+</script>
+
 <style>
   .site-header {
     position: sticky;
