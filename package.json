@@ -9,7 +9,8 @@
     "preview": "astro preview",
     "fetch": "node scripts/fetch-collection.mjs",
     "derive": "node scripts/derive-images.mjs && node scripts/brand-images.mjs",
-    "archive": "node scripts/archive-collection.mjs"
+    "archive": "node scripts/archive-collection.mjs",
+    "test": "node --test \"scripts/test/*.test.mjs\""
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",

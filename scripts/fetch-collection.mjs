@@ -7,7 +7,8 @@ import { createPublicClient, http, parseAbi, getAddress } from 'viem';
 import { mainnet } from 'viem/chains';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { OWNER, RPC_URL, INDEXER_URL, FLAGSHIPS, HIDDEN, METADATA_SERVICES, IMAGE_OVERRIDES } from './config.mjs';
+import { OWNER, RPC_URL, INDEXER_URL, FLAGSHIPS, HIDDEN, METADATA_SERVICES, IMAGE_OVERRIDES, ARCHIVE_ALLOW } from './config.mjs';
+import { isSpam } from './lib/spam.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const DATA = path.join(ROOT, 'data');
@@ -27,7 +28,10 @@ const abi1155 = parseAbi([
   'function uri(uint256) view returns (string)',
 ]);
 
-import { MIME_EXT, sniff, sleep, lc, slugify, fetchWithFallback, curlGet, pool, isValid, existing, download, normalizeAttrs } from './lib/media.mjs';
+import { lc, slugify, fetchWithFallback, pool, download, normalizeAttrs, fileId } from './lib/media.mjs';
+
+// Metadata is someone else's JSON: a field that is not a string would break the site build.
+const str = (v) => (typeof v === 'string' && v.trim() ? v : null);
 
 // ---------- discovery ----------
 async function discover() {
@@ -40,7 +44,7 @@ async function discover() {
     for (const it of d.items ?? []) {
       found.push({
         contract: getAddress(it.token.address_hash ?? it.token.address),
-        collectionName: it.token.name,
+        collectionName: str(it.token.name),
         standard: it.token_type === 'ERC-1155' ? 'erc1155' : 'erc721',
         tokenId: String(it.id),
         indexerMeta: it.metadata ?? null,
@@ -129,7 +133,10 @@ async function main() {
   await readChain(visible);
   const notOwned = visible.filter((t) => t.owned === false);
   if (notOwned.length) console.warn(`Skipping ${notOwned.length} token(s) not owned on-chain (indexer lag):`, notOwned.map((t) => `${t.collectionName} #${t.tokenId}`));
-  const tokens = visible.filter((t) => t.owned !== false);
+  let tokens = visible.filter((t) => t.owned !== false);
+  // Flagships are the owner's own picks; the spam filter only guards everything else.
+  const flagshipContracts = new Set(FLAGSHIPS.flatMap((f) => f.members.map((m) => lc(m.contract))));
+  const filtered = (t) => !flagshipContracts.has(lc(t.contract)) && !ARCHIVE_ALLOW[lc(t.contract)];
 
   const broken = [];
   const suspicious = [];
@@ -137,17 +144,22 @@ async function main() {
   await pool(tokens, 6, async (t) => {
     const { meta, source } = await loadMeta(t);
     t.metadataSource = source;
+    t.name = str(meta?.name);
+    t.description = str(meta?.description);
+    t.externalUrl = str(meta?.external_url);
+    // same filter as the personal archive: bait never reaches the site, not even as a download
+    if (filtered(t) && isSpam(t)) {
+      t.spam = true;
+      return;
+    }
     const dir = path.join(ORIGINALS, lc(t.contract));
     await mkdir(dir, { recursive: true });
-    const safeId = t.tokenId.length > 40 ? t.tokenId.slice(0, 40) : t.tokenId;
+    const safeId = fileId(t.tokenId);
 
     const override = IMAGE_OVERRIDES[lc(t.contract)]?.[t.tokenId];
-    const image = override?.url ?? override?.image ?? meta?.image ?? meta?.image_url ?? t.indexerImage ?? null;
+    const image = override?.url ?? override?.image ?? str(meta?.image) ?? str(meta?.image_url) ?? str(t.indexerImage);
     t.imageSource = override?.source ?? 'original';
-    const animation = override?.animation ?? meta?.animation_url ?? t.indexerAnimation ?? null;
-    t.name = meta?.name ?? null;
-    t.description = meta?.description ?? null;
-    t.externalUrl = meta?.external_url ?? null;
+    const animation = override?.animation ?? str(meta?.animation_url) ?? str(t.indexerAnimation);
     t.image = image;
     t.animationUrl = animation;
     t.attributes = normalizeAttrs(meta?.attributes);
@@ -164,6 +176,19 @@ async function main() {
     if (!meta || /claim|airdrop|reward|voucher|visit\s+\S+\.\w+|free\s+mint/i.test(text)) suspicious.push(`${t.collectionName} #${t.tokenId}: ${text.slice(0, 100)}`);
     if (++done % 20 === 0) console.log(`  ${done}/${tokens.length}`);
   });
+
+  const spam = tokens.filter((t) => t.spam);
+  for (const t of spam) hidden.push({ contract: t.contract, name: t.collectionName, tokenId: t.tokenId, reason: 'spam filter (scripts/lib/spam.mjs)' });
+  if (spam.length) console.warn(`Hidden by the spam filter: ${spam.length} token(s); add the contract to ARCHIVE_ALLOW if one is real:`, spam.map((t) => `${t.collectionName} #${t.tokenId.slice(0, 12)} ${t.contract}`));
+  tokens = tokens.filter((t) => !t.spam);
+  // Contracts the site has not shown before go to the owner for a look before the commit.
+  let before = new Set();
+  try {
+    const prev = JSON.parse(await readFile(path.join(DATA, 'collection.json'), 'utf8'));
+    before = new Set(prev.groups.flatMap((g) => g.members.map((m) => lc(m.contract))));
+  } catch {}
+  const fresh = [...new Set(tokens.map((t) => lc(t.contract)))].filter((c) => !before.has(c));
+  if (before.size && fresh.length) console.warn(`\nNew collections on the site, check before committing:\n  ${fresh.map((c) => `${tokens.find((t) => lc(t.contract) === c).collectionName ?? '?'} ${c}`).join('\n  ')}`);
 
   // group
   const memberOf = new Map();
@@ -200,14 +225,17 @@ async function main() {
     kind: 'flagship',
     members: f.members.map((m) => member(m.contract, m.name, m.slug)).filter((m) => m.count > 0),
   }));
-  const usedSlugs = new Set(FLAGSHIPS.flatMap((f) => f.members.map((m) => m.slug)));
+  // slugs are also element ids on the collection pages (anchors), so page ids are taken too
+  const usedSlugs = new Set([...FLAGSHIPS.flatMap((f) => f.members.map((m) => m.slug)), 'main', 'mine']);
+  // sorted, so the same wallet gives the same slugs whatever order the indexer answers in
   const others = [...byContract.keys()]
     .filter((k) => !memberOf.has(k))
+    .sort()
     .map((k) => {
       const first = byContract.get(k)[0];
       const name = first.collectionName || first.name?.replace(/\s*#\d+$/, '') || `Contract ${k.slice(0, 8)}`;
-      let slug = slugify(name);
-      while (usedSlugs.has(slug)) slug += '-' + k.slice(2, 6);
+      let slug = slugify(name) || `contract-${k.slice(2, 10)}`;
+      for (let n = 6; usedSlugs.has(slug); n += 2) slug = `${slugify(name) || 'contract'}-${k.slice(2, n)}`;
       usedSlugs.add(slug);
       return member(k, name, slug);
     })
