@@ -55,6 +55,52 @@ git config user.email 321777324+CryptoDrakaris@users.noreply.github.com
 - После работы: `git add -A && git commit -m "..." && git push`
 - Не правьте проект на двух компьютерах одновременно, иначе при `git pull` будут конфликты.
 
+### Если история на GitHub переписана
+
+Историю переписывают, когда из старых коммитов нужно убрать лишнее (последний раз – 2026-11-12). Хеши коммитов после этого другие, и обычный `git pull` на старом клоне выдаёт ошибку или пытается слить старую историю с новой. **Не сливать и не делать `git push --force` со старого клона:** старые коммиты вернутся на GitHub.
+
+Порядок для каждого компьютера со старым клоном. Оригиналы `data/originals`, `node_modules` и прочие файлы вне git не трогаются.
+
+1. Проверить, нет ли своей неотправленной работы:
+
+   ```bash
+   cd ~/Projects/drakaris-site
+   git status --short
+   git log --oneline origin/main..HEAD
+   ```
+
+   Если обе команды ничего не выводят – сразу к шагу 2. Иначе сохранить свои изменения в патчи и отложить правки:
+
+   ```bash
+   git format-patch origin/main..HEAD -o ~/Desktop/drakaris-patches
+   git stash push -u -m "до переписанной истории"
+   ```
+
+2. Перейти на новую историю:
+
+   ```bash
+   git fetch --prune origin
+   git checkout main
+   git reset --hard origin/main
+   for b in $(git for-each-ref --format='%(refname:short)' refs/heads/ | grep -vx main); do git branch -D "$b"; done
+   npm ci
+   ```
+
+   В шаге 1 была работа? Вернуть её: `git am ~/Desktop/drakaris-patches/*.patch` (коммиты), затем `git stash pop` (неотправленные правки). Конфликт – решить, `git add` и `git am --continue`.
+
+3. Удалить старую историю с диска – только после шага 2, иначе отложенные правки удержат её:
+
+   ```bash
+   git stash list          # должно быть пусто
+   git update-ref -d ORIG_HEAD   # после reset указывает на старый коммит
+   git reflog expire --expire=now --all
+   git gc --prune=now
+   ```
+
+4. Проверить: `git status -sb` показывает `## main...origin/main` (с `ahead`, если вернули свои коммиты), а `git log --oneline -1 origin/main` – тот же коммит, что на главной странице репозитория на GitHub.
+
+Вместо шагов 1–3 можно клон удалить и сделать заново (раздел «Рабочая копия»), но тогда `data/originals` и `node_modules` нужно перенести или восстановить (`npm ci`, `npm run fetch`).
+
 ## Что в репозитории, а что восстанавливается
 
 | Папка | Размер | Где |
