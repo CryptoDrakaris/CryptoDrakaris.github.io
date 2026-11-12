@@ -55,10 +55,6 @@ export const ARCHIVE_DENY = {
   '0x6b0d7a38c08375a132a7b43f67fb4a97bb630471': '«NFTCard»: карта «на 2200 USDT» с usesapp.com',
 };
 
-// Bitcoin: checked 2026-09-25 on ordinals.com and mempool.space. The address holds two plain
-// outputs (5698 + 294 sat) and no inscriptions, so there is nothing to archive.
-export const BITCOIN = { address: '[адрес удалён]', inscriptions: 0 };
-
 // Contracts without tokenURI whose metadata comes from an official service.
 export const METADATA_SERVICES = {
   // ENS Base Registrar and NameWrapper

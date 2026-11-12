@@ -78,10 +78,10 @@ npm run derive   # сделать превью и акцентные цвета 
 npm run archive  # личный архив: оригиналы со всех сетей на диск, на сайт не попадают
 ```
 
-Проверка доступности перед публикацией (зависимости ставятся вместе с проектом через `npm ci`):
+Проверка доступности перед публикацией (скил `design-audit` – приватный репозиторий `CryptoDrakaris/design-audit`, клон в `~/Projects/design-audit`; зависимости `axe-core` и `jsdom` ставятся вместе с сайтом через `npm ci`):
 
 ```bash
-node .claude/skills/design-audit/scripts/axe-static.mjs dist --limit 600
+node ~/Projects/design-audit/scripts/axe-static.mjs dist --limit 600
 ```
 
 ## Личный архив по всем сетям
@@ -123,5 +123,4 @@ git add -A && git commit -m "Обновить коллекцию" && git push
 
 - `CLAUDE.md` – все решения по проекту: структура, темы, каноны брендов, правила сбора коллекции. Клод читает этот файл автоматически.
 - `README.md` – краткое описание и порядок публикации.
-- `.claude/skills/design-audit` – проектный скил проверки дизайна, копия репозитория `CryptoDrakaris/design-audit`.
 - `.github/workflows/deploy.yml` – автоматическая публикация на GitHub Pages.

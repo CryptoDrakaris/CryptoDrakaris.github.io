@@ -52,8 +52,9 @@ const size = fullSize(col, token);
 // image rescued from an archive or a marketplace because the project's own host is gone
 const rescued = token.imageSource && token.imageSource !== 'original';
 // Link the original only when it was actually downloaded, so dead hosts get no broken link.
-// Rescue sources are hotlink-protected, so those open our own stored copy instead.
-const original = !token.originalFile ? null : rescued ? full : originalUrl(token);
+// Rescue sources are hotlink-protected, and on-chain art or a URI that is not https has no
+// safe outside address (originalUrl gives null), so those open our own stored copy instead.
+const original = !token.originalFile ? null : rescued ? full : (originalUrl(token) ?? full);
 
 const backHref = group.kind === 'flagship' ? href(lang, `collections/${group.slug}`) + `#${col.slug}` : href(lang, 'collections/others') + `#${col.slug}`;
 const backName = group.kind === 'flagship' ? group.name : col.name;
