@@ -41,6 +41,8 @@ export type Group = {
   count: number;
 };
 
+const str = (v: unknown) => (typeof v === 'string' && v.trim() ? v : null);
+
 type DerivedEntry = { accent?: string; tokens: Record<string, { thumb?: boolean; grid: boolean; full: boolean; width?: number; height?: number; animated?: boolean; kind?: string }> };
 const manifest = derivedManifest as Record<string, DerivedEntry>;
 
@@ -52,7 +54,16 @@ export const groups: Group[] = (data.groups as any[]).map((g) => {
     ...m,
     accent: manifest[m.contract.toLowerCase()]?.accent ?? '#ff6a3d',
     group,
-    tokens: (m.tokens as Token[]).map((t) => ({ ...t, attributes: t.attributes ?? [] })),
+    tokens: (m.tokens as Token[]).map((t) => ({
+      ...t,
+      // metadata is someone else's JSON: anything that is not a string is dropped, not rendered
+      name: str(t.name),
+      description: str(t.description),
+      externalUrl: str(t.externalUrl),
+      image: str(t.image),
+      animationUrl: str(t.animationUrl),
+      attributes: Array.isArray(t.attributes) ? t.attributes.filter((a) => typeof a?.trait_type === 'string' && typeof a?.value === 'string') : [],
+    })),
   }));
   group.count = group.members.reduce((n, m) => n + m.tokens.length, 0);
   return group;
@@ -93,13 +104,22 @@ export function fullSize(col: Collection, t: Token) {
 }
 
 const IPFS_GATEWAY = 'https://ipfs.io/ipfs/';
+/**
+ * Link for a media URI from token metadata, or null. Only https leaves the site: the URI is written
+ * by whoever deployed the contract, so `javascript:`, `data:`, plain http and relative markers
+ * such as 'image_data' (on-chain SVG) must never become an href.
+ */
 export function toHttp(uri: string | null) {
   if (!uri) return null;
   const m = uri.match(/^ipfs:\/\/(?:ipfs\/)?(.+)$/);
   if (m) return IPFS_GATEWAY + m[1];
   if (uri.startsWith('ar://')) return 'https://arweave.net/' + uri.slice(5);
-  if (uri.startsWith('data:')) return null;
-  return uri;
+  try {
+    const u = new URL(uri);
+    return u.protocol === 'https:' ? u.href : null;
+  } catch {
+    return null;
+  }
 }
 export const originalUrl = (t: Token) => toHttp(t.animationUrl) ?? toHttp(t.image);
 
