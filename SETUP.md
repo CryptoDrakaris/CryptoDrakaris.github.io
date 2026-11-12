@@ -3,7 +3,7 @@
 Сайт: https://cryptodrakaris.github.io/
 Репозиторий: https://github.com/CryptoDrakaris/CryptoDrakaris.github.io
 
-Компьютеров два, оба Mac: MacBook Pro дома и Mac mini в офисе. На каждом – своя рабочая копия `~/Projects/drakaris-site`, между ними проект переносится через GitHub (`git pull` / `git push`).
+Компьютеры – Mac. На каждом – своя рабочая копия `~/Projects/drakaris-site`, между ними проект переносится через GitHub (`git pull` / `git push`).
 
 ## Что нужно установить
 
@@ -43,13 +43,11 @@ git config user.name Drakaris
 git config user.email 321777324+CryptoDrakaris@users.noreply.github.com
 ```
 
-### Почему не в папке Proton Drive
+### Почему не в облачной папке
 
-На Mac Proton Drive хранит файлы «по требованию»: на диске лежит заглушка (в `ls -lO` – пометка `dataless`), содержимое скачивается при первом обращении. С тысячами мелких файлов `node_modules` и с папкой `.git` это не работает: сборка и `git status` зависают без вывода, а синхронизация теряет файлы. Поэтому проект живёт в `~/Projects`, а не в Proton Drive.
+Облачные диски на Mac хранят файлы «по требованию»: на диске лежит заглушка (в `ls -lO` – пометка `dataless`), содержимое скачивается при первом обращении. С тысячами мелких файлов `node_modules` и с папкой `.git` это не работает: сборка и `git status` зависают без вывода, а синхронизация теряет файлы. Поэтому проект живёт в `~/Projects`. Облачная копия – только для чтения и для того, чего нет в git (`data/originals`).
 
-Папка `CLAUDE/LAZY_LIONS` в Proton Drive – копия репозитория для чтения и место для того, чего нет в git (`data/originals`, папка `передача`). Работать в ней и собирать сайт не нужно.
-
-## Работа на двух Mac
+## Работа на нескольких компьютерах
 
 Главное правило: **основное хранилище – репозиторий на GitHub.**
 
@@ -112,7 +110,7 @@ git add -A && git commit -m "Обновить коллекцию" && git push
 |---|---|
 | `Cannot find package 'astro'` или похожее | `npm ci` |
 | `node: command not found` после `brew install node@22` | `brew link --force --overwrite node@22` |
-| `npm run build` или `git status` висят без вывода | вы в папке Proton Drive, работайте в `~/Projects/drakaris-site` |
+| `npm run build` или `git status` висят без вывода | вы в облачной папке, работайте в `~/Projects/drakaris-site` |
 | `sh: .../node_modules/.bin/astro: Permission denied` | `node_modules` скопирована с другого компьютера: удалить её и выполнить `npm ci` |
 | Порт 4321 занят | `npm run dev -- --port 4322` |
 | `npm run fetch` ругается на 429 и часть картинок не скачалась | публичные шлюзы IPFS ограничивают частоту. Повторить позже, скрипт докачивает только недостающее |
