@@ -18,14 +18,14 @@ export const CATEGORIES: Record<string, string> = {
 };
 export const CATEGORY_KEYS = Object.keys(CATEGORIES);
 
-export const HABITS: { key: string; title: string }[] = [
-  { key: 'steps_ok', title: 'Шаги не меньше цели' },
-  { key: 'food_ok', title: 'Ел по меню: 4 приёма, без сладких напитков, выпечки, фастфуда и еды после 21:00' },
-  { key: 'water_ok', title: 'Вода по цели' },
-  { key: 'cat_ok', title: 'Дракарис: корм, вода, лоток' },
-  { key: 'tidy_ok', title: '10 минут уборки: посуда, мусор, поверхности' },
-  { key: 'sleep_ok', title: 'Лёг вовремя' },
-  { key: 'workout', title: 'Была тренировка' },
+export const HABITS: { key: string; title: string; short: string }[] = [
+  { key: 'steps_ok', title: 'Шаги не меньше цели', short: 'Шаги' },
+  { key: 'food_ok', title: 'Ел по меню: 4 приёма, без сладких напитков, выпечки, фастфуда и еды после 21:00', short: 'Еда по меню' },
+  { key: 'water_ok', title: 'Вода по цели', short: 'Вода' },
+  { key: 'cat_ok', title: 'Дракарис: корм, вода, лоток', short: 'Дракарис' },
+  { key: 'tidy_ok', title: '10 минут уборки: посуда, мусор, поверхности', short: 'Уборка' },
+  { key: 'sleep_ok', title: 'Лёг вовремя', short: 'Сон вовремя' },
+  { key: 'workout', title: 'Была тренировка', short: 'Тренировка' },
 ];
 
 export const ROUTINE = [

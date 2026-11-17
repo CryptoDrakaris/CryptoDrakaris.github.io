@@ -1,9 +1,9 @@
 // План Абая: клиент трекера. Вход по ссылке из письма, данные – Supabase под RLS.
 // Вся разметка строится из DOM-узлов (util.h), данные из базы в innerHTML не попадают.
 import { createClient, type Session, type SupabaseClient } from '@supabase/supabase-js';
-import { CATEGORIES, CATEGORY_KEYS, DEADLINE, HABITS, REPORT_FIELDS, ROUTINE, START } from './config';
+import { CATEGORIES, CATEGORY_KEYS, DEADLINE, HABITS, REPORT_FIELDS, ROUTINE, START, TZ_OFFSET_MIN } from './config';
 import food from './food.json';
-import { clear, dateTime, daysBetween, dm, h, load, mondayOf, num, parseNum, plural, save, todayISO, weekday } from './util';
+import { addDays, clear, dateTime, daysBetween, dm, h, load, mondayOf, num, parseNum, plural, save, todayISO, weekday } from './util';
 import { weightChart } from './chart';
 
 // ---------------------------------------------------------------- типы
@@ -202,23 +202,37 @@ async function signOut() {
 
 // ---------------------------------------------------------------- оболочка и вкладки
 
-const TABS = [
+type TabId = 'today' | 'week' | 'report' | 'food' | 'goals' | 'progress' | 'summary';
+interface Tab { id: TabId; label: string; render: () => Node }
+
+// Абай заполняет, папа смотрит: у каждого своё меню.
+const SON_TABS: Tab[] = [
   { id: 'today', label: 'Сегодня', render: renderToday },
   { id: 'week', label: 'Неделя', render: renderWeeks },
   { id: 'report', label: 'Отчёт', render: renderReport },
   { id: 'food', label: 'Питание', render: renderFood },
   { id: 'goals', label: 'Цели', render: renderGoals },
   { id: 'progress', label: 'Прогресс', render: renderProgress },
-] as const;
-type TabId = (typeof TABS)[number]['id'];
+];
+const FATHER_TABS: Tab[] = [
+  { id: 'summary', label: 'Сводка', render: renderSummary },
+  { id: 'week', label: 'Недели', render: renderWeeks },
+  { id: 'goals', label: 'Цели', render: renderGoals },
+  { id: 'progress', label: 'Прогресс', render: renderProgress },
+];
+let TABS: Tab[] = SON_TABS;
+const tabKey = () => `abay-tab-${S.me?.role ?? 'son'}`;
 
-let activeTab: TabId = (load<string>('abay-tab', 'today') as TabId);
-if (!TABS.some((t) => t.id === activeTab)) activeTab = 'today';
+let activeTab: TabId = 'today';
 const panel = h('section', { class: 'ab-panel', role: 'tabpanel', tabindex: '-1' });
 const tabButtons = new Map<TabId, HTMLButtonElement>();
 
 function shell() {
-  const tabs = h('div', { class: 'ab-tabs', role: 'tablist', 'aria-label': 'Разделы' });
+  TABS = isFather() ? FATHER_TABS : SON_TABS;
+  activeTab = load<string>(tabKey(), TABS[0].id) as TabId;
+  if (!TABS.some((t) => t.id === activeTab)) activeTab = TABS[0].id;
+  tabButtons.clear();
+  const tabs = h('div', { class: `ab-tabs n${TABS.length}`, role: 'tablist', 'aria-label': 'Разделы' });
   for (const t of TABS) {
     const b = h('button', {
       type: 'button', role: 'tab', id: `ab-tab-${t.id}`, 'aria-controls': 'ab-panel', text: t.label,
@@ -254,7 +268,7 @@ function shell() {
 
 function openTab(id: TabId, focusPanel: boolean) {
   activeTab = id;
-  save('abay-tab', id);
+  save(tabKey(), id);
   for (const [tid, b] of tabButtons) {
     const on = tid === id;
     b.setAttribute('aria-selected', String(on));
@@ -384,7 +398,8 @@ function taskRow(t: Task, editable: boolean): HTMLElement {
     h('label', { class: 'ab-check', for: id }, box,
       h('span', null, t.title,
         t.locked ? h('span', { class: 'ab-lock', title: 'Задачу меняет папа', text: ' 🔒' }) : null,
-        mine ? h('span', { class: 'ab-tag', text: 'своя' }) : null)),
+        mine && !isFather() ? h('span', { class: 'ab-tag', text: 'своя' }) : null,
+        isFather() && t.created_by && t.created_by !== uid() ? h('span', { class: 'ab-tag', text: 'добавил Абай' }) : null)),
     canEdit ? h('div', { class: 'ab-row-actions' },
       h('button', { type: 'button', class: 'ab-link', text: 'Изменить', onclick: () => li.replaceWith(taskEditor(t)) }),
       h('button', { type: 'button', class: 'ab-link danger', text: 'Удалить', onclick: async (e: Event) => {
@@ -445,7 +460,7 @@ function addTaskForm(w: Week): HTMLElement {
   const st = statusLine();
   const btn = h('button', { type: 'submit', class: 'ab-btn small', text: 'Добавить' });
   return h('details', { class: 'ab-add' },
-    h('summary', { text: '+ Добавить свою задачу' }),
+    h('summary', { text: isFather() ? '+ Добавить задачу' : '+ Добавить свою задачу' }),
     h('form', { class: 'ab-inline', onsubmit: (e: Event) => {
       e.preventDefault();
       busy(btn, async () => {
@@ -481,10 +496,12 @@ function renderWeeks(): Node {
       ),
       h('p', { class: 'ab-muted small' },
         `Цель по весу к концу недели – ${num(planWeight(w.ends), 1)} кг. Задач выполнено: ${done} из ${tasks.length}. Отчёт – до ${dateTime(w.report_due)}.`),
+      isFather() ? reportView(w) : null,
+      isFather() ? h('h3', { class: 'ab-sub', text: 'Задачи' }) : null,
       taskList(tasks, true),
       addTaskForm(w),
       h('div', { class: 'ab-comments' },
-        h('h3', { text: 'Комментарии папы' }),
+        h('h3', { text: isFather() ? 'Ваши комментарии' : 'Комментарии папы' }),
         comments.length
           ? h('ul', null, comments.map((c) => h('li', null,
               h('p', { text: c.text }),
@@ -494,6 +511,30 @@ function renderWeeks(): Node {
       ),
     );
   }));
+}
+
+/** Отчёт Абая за неделю целиком – для папы. */
+function reportView(w: Week): HTMLElement {
+  const r = S.reports.find((x) => x.week === w.n);
+  if (!r) {
+    const st = weekStatus(w);
+    return h('div', { class: 'ab-report' },
+      h('h3', { class: 'ab-sub', text: 'Отчёт Абая' }),
+      h('p', { class: st.tone === 'bad' ? 'ab-bad' : 'ab-muted small', text: st.tone === 'bad' ? `Не сдан, срок был ${dateTime(w.report_due)}.` : `Ещё не сдан. Срок – ${dateTime(w.report_due)}.` }));
+  }
+  const late = Date.parse(r.submitted_at) > Date.parse(w.report_due);
+  const rows: [string, string][] = [];
+  if (r.weight != null) rows.push(['Вес', `${num(Number(r.weight), 1)} кг (план ${num(planWeight(w.ends), 1)})`]);
+  if (r.waist != null) rows.push(['Талия', `${num(Number(r.waist), 1)} см`]);
+  for (const f of REPORT_FIELDS) {
+    const v = (r[f.key] as string | null)?.trim();
+    rows.push([f.label, v || '–']);
+  }
+  return h('div', { class: 'ab-report' },
+    h('h3', { class: 'ab-sub', text: 'Отчёт Абая' }),
+    h('p', { class: 'ab-muted small', text: `Сдан ${dateTime(r.submitted_at)}${late ? ' – после срока' : ''}.` }),
+    h('dl', { class: 'ab-dl' }, rows.map(([k, v]) => [h('dt', { text: k }), h('dd', { class: v === '–' ? 'ab-muted' : '', text: v })])),
+  );
 }
 
 function commentForm(w: Week): HTMLElement {
@@ -679,12 +720,14 @@ function renderGoals(): Node {
   return h('div', { class: 'ab-stack' },
     h('div', { class: 'ab-card' },
       h('h2', { text: 'Цели' }),
-      h('p', { class: 'ab-muted small', text: 'Цель без замка можно поменять самому – в допустимых пределах и с причиной. Цели с замком меняет папа.' }),
+      h('p', { class: 'ab-muted small', text: isFather()
+        ? 'Любую цель можно поменять, указав причину. Абай увидит изменение и причину в истории. Цели без замка он может менять сам в указанных пределах.'
+        : 'Цель без замка можно поменять самому – в допустимых пределах и с причиной. Цели с замком меняет папа.' }),
       h('ul', { class: 'ab-goals' }, S.goals.map((g) => goalRow(g))),
     ),
     h('div', { class: 'ab-card' },
       h('h2', { text: 'История изменений' }),
-      changesList(S.changes, false),
+      changesList(S.changes, isFather()),
     ),
   );
 }
@@ -767,6 +810,22 @@ function changesList(list: GoalChange[], highlightNew: boolean): Node {
 
 // ---------------------------------------------------------------- «Прогресс»
 
+/** Факт по весу: ежедневные отметки и отчёты (отчёт – на воскресенье недели); отметка за тот же день важнее. */
+function weightFacts(): { day: string; v: number }[] {
+  const facts = new Map<string, number>();
+  for (const r of S.reports) {
+    const wk = S.weeks.find((x) => x.n === r.week);
+    // отчёт могут сдать раньше воскресенья: вес ставим на день сдачи, а не в будущее
+    const sent = new Date(Date.parse(r.submitted_at) + TZ_OFFSET_MIN * 60_000).toISOString().slice(0, 10);
+    if (wk && r.weight != null && !facts.has(sent < wk.ends ? sent : wk.ends)) facts.set(sent < wk.ends ? sent : wk.ends, Number(r.weight));
+  }
+  for (const c of S.checkins) if (c.weight != null) facts.set(c.day, Number(c.weight));
+  return [...facts].map(([day, v]) => ({ day, v })).sort((a, b) => a.day.localeCompare(b.day));
+}
+
+const stat = (value: string, label: string, tone = '') =>
+  h('div', { class: `ab-stat ${tone}` }, h('span', { class: 'ab-stat-v', text: value }), h('span', { class: 'ab-stat-l', text: label }));
+
 function renderProgress(): Node {
   const today = todayISO();
   const w = currentWeek();
@@ -781,23 +840,10 @@ function renderProgress(): Node {
   const foodOk = weekIns.filter((c) => c.habits?.food_ok).length;
   const daysInWeek = w ? Math.min(7, Math.max(0, daysBetween(w.starts, today) + 1)) : 0;
 
-  // факт: вес из ежедневных отметок и отчётов (отчёт – на воскресенье недели); отметка за тот же день важнее
-  const facts = new Map<string, number>();
-  for (const r of S.reports) {
-    const wk = S.weeks.find((x) => x.n === r.week);
-    if (wk && r.weight != null) facts.set(wk.ends, Number(r.weight));
-  }
-  for (const c of S.checkins) if (c.weight != null) facts.set(c.day, Number(c.weight));
-  const factPoints = [...facts].map(([day, v]) => ({ day, v })).sort((a, b) => a.day.localeCompare(b.day));
+  const factPoints = weightFacts();
   const last = factPoints.at(-1);
 
-  const stat = (value: string, label: string) => h('div', { class: 'ab-stat' }, h('span', { class: 'ab-stat-v', text: value }), h('span', { class: 'ab-stat-l', text: label }));
-
   return h('div', { class: 'ab-stack' },
-    isFather() ? h('div', { class: 'ab-card' },
-      h('h2', { text: 'Изменения целей' }),
-      changesList(S.changes, true),
-    ) : null,
     h('div', { class: 'ab-card' },
       h('h2', { text: 'Вес: план и факт' }),
       last
@@ -824,6 +870,126 @@ function renderProgress(): Node {
         stat(`${foodOk} из ${daysInWeek}`, 'дней «еда по плану»'),
       ),
     ),
+  );
+}
+
+// ---------------------------------------------------------------- «Сводка» (папа)
+
+function renderSummary(): Node {
+  const today = todayISO();
+  const w = currentWeek();
+  const son = S.profiles.find((p) => p.role === 'son');
+  const goTo = (id: TabId, text: string) => h('button', { type: 'button', class: 'ab-link', text, onclick: () => openTab(id, true) });
+
+  // ---- вес
+  const facts = weightFacts();
+  const last = facts.at(-1);
+  const startW = goalNum('start_weight', 125);
+  let weightCard: Node;
+  if (!last) {
+    weightCard = h('p', { class: 'ab-muted', text: 'Абай ещё ни разу не отметил вес.' });
+  } else {
+    const diff = last.v - planWeight(last.day);
+    const lost = startW - last.v;
+    const tone = diff > 0.3 ? 'bad' : 'ok';
+    const vsPlan = Math.abs(diff) <= 0.3 ? 'по плану' : `${diff > 0 ? '+' : '−'}${num(Math.abs(diff), 1)} кг`;
+    const stale = daysBetween(last.day, today);
+    weightCard = h('div', { class: 'ab-stats' },
+      stat(`${num(last.v, 1)} кг`, `последний вес, ${dm(last.day)}${stale >= 3 ? ` (${stale} ${plural(stale, 'день', 'дня', 'дней')} назад)` : ''}`, stale >= 3 ? 'warn' : ''),
+      stat(vsPlan, `${Math.abs(diff) <= 0.3 ? '' : diff > 0 ? 'выше плана' : 'ниже плана'} на ${dm(last.day)}: план ${num(planWeight(last.day), 1)} кг`.trim(), tone),
+      stat(`${lost >= 0 ? '−' : '+'}${num(Math.abs(lost), 1)} кг`, `от старта (${num(startW, 1)} кг)`),
+      stat(`${num(planWeight(DEADLINE), 1)} кг`, 'цель к 26.12'),
+    );
+  }
+
+  // ---- последние 7 дней
+  const from = [addDays(today, -6), START].sort().at(-1)!;
+  const dayList: string[] = [];
+  for (let d = today; d >= from; d = addDays(d, -1)) dayList.push(d);
+  const stepsGoal = goalNum('steps', 8000);
+  const filled = dayList.filter((d) => S.checkins.some((c) => c.day === d)).length;
+  const dayRows = dayList.map((d) => {
+    const c = S.checkins.find((x) => x.day === d);
+    const label = `${weekday(d)} ${dm(d)}`;
+    if (!c) {
+      return h('tr', { class: d === today ? '' : 'miss' },
+        h('td', { text: label }),
+        h('td', { colspan: 3, class: d === today ? 'ab-muted' : 'ab-bad', text: d === today ? 'ещё не заполнен' : 'не заполнен' }));
+    }
+    const nHab = HABITS.filter((hb) => c.habits?.[hb.key]).length;
+    return h('tr', null,
+      h('td', { text: label }),
+      h('td', { text: c.weight != null ? num(Number(c.weight), 1) : '–' }),
+      h('td', { class: c.steps != null && c.steps < stepsGoal ? 'ab-bad' : '', text: c.steps != null ? num(c.steps) : '–' }),
+      h('td', { text: `${nHab} из ${HABITS.length}` }));
+  });
+  const notes = dayList.map((d) => S.checkins.find((c) => c.day === d)).filter((c): c is Checkin => !!c?.note?.trim());
+  const daysCard = h('div', { class: 'ab-card' },
+    h('h2', { text: 'Последние 7 дней' }),
+    h('p', { class: filled < dayList.length - 1 ? 'ab-bad' : 'ab-muted small', text: `Заполнено дней: ${filled} из ${dayList.length}. Цель по шагам – ${num(stepsGoal)}.` }),
+    h('table', { class: 'ab-table' },
+      h('thead', null, h('tr', null, h('th', { text: 'День' }), h('th', { text: 'Вес' }), h('th', { text: 'Шаги' }), h('th', { text: 'Отметки' }))),
+      h('tbody', null, dayRows)),
+    h('h3', { class: 'ab-sub', text: 'Привычки за эти дни' }),
+    h('ul', { class: 'ab-kv' }, HABITS.map((hb) => {
+      const n = dayList.filter((d) => S.checkins.find((c) => c.day === d)?.habits?.[hb.key]).length;
+      return h('li', null, h('span', { text: hb.short }), h('b', { class: n * 2 < dayList.length ? 'ab-bad' : '', text: `${n} из ${dayList.length}` }));
+    })),
+    notes.length ? [
+      h('h3', { class: 'ab-sub', text: 'Заметки Абая' }),
+      h('ul', { class: 'ab-plain' }, notes.map((c) => h('li', null, h('span', { class: 'ab-muted small', text: `${weekday(c.day)} ${dm(c.day)}: ` }), c.note!))),
+    ] : null,
+  );
+
+  // ---- задачи
+  const weekTasks = w ? S.tasks.filter((t) => t.week === w.n) : [];
+  const open = weekTasks.filter((t) => !t.done);
+  const tails = S.tasks.filter((t) => !t.done && w && t.week < w.n);
+  const taskItem = (t: Task) => h('li', null, t.title, h('span', { class: 'ab-muted small', text: ` – ${CATEGORIES[t.category as keyof typeof CATEGORIES] ?? t.category}${w && t.week !== w.n ? `, неделя ${t.week}` : ''}` }));
+  const tasksCard = h('div', { class: 'ab-card' },
+    h('h2', { text: w ? `Задачи недели ${w.n}: ${weekTasks.length - open.length} из ${weekTasks.length}` : 'Задачи' }),
+    open.length
+      ? [h('p', { class: 'ab-muted small', text: 'Не сделано:' }), h('ul', { class: 'ab-plain' }, open.map(taskItem))]
+      : h('p', { class: 'ab-ok', text: 'Все задачи недели выполнены.' }),
+    tails.length ? [
+      h('h3', { class: 'ab-sub ab-bad', text: `Хвосты прошлых недель: ${tails.length}` }),
+      h('ul', { class: 'ab-plain' }, tails.map(taskItem)),
+    ] : null,
+    goTo('week', 'Все недели и правка задач'),
+  );
+
+  // ---- отчёты
+  const started = S.weeks.filter((x) => x.starts <= today);
+  const reportsCard = h('div', { class: 'ab-card' },
+    h('h2', { text: `Отчёты: сдано ${S.reports.length} из ${S.weeks.length}` }),
+    h('ul', { class: 'ab-kv' }, started.map((x) => {
+      const st = weekStatus(x);
+      const r = S.reports.find((y) => y.week === x.n);
+      return h('li', null,
+        h('span', null, `Неделя ${x.n}`, h('span', { class: 'ab-muted small', text: r ? ` · ${dateTime(r.submitted_at)}` : ` · срок ${dateTime(x.report_due)}` })),
+        h('span', { class: `ab-badge ${st.tone}`, text: st.text }));
+    })),
+    goTo('week', 'Читать отчёты и комментировать'),
+  );
+
+  // ---- изменения целей Абаем за неделю
+  const weekAgo = Date.now() - 7 * 86_400_000;
+  const recent = S.changes.filter((c) => c.changed_by === son?.user_id && Date.parse(c.changed_at) > weekAgo);
+  const goalsCard = h('div', { class: 'ab-card' },
+    h('h2', { text: 'Абай менял цели' }),
+    recent.length ? changesList(recent, true) : h('p', { class: 'ab-muted', text: 'За последние 7 дней Абай цели не менял.' }),
+    goTo('goals', 'Все цели и история'),
+  );
+
+  return h('div', { class: 'ab-stack' },
+    h('div', { class: 'ab-card' },
+      h('h2', { text: w ? `Неделя ${w.n} из ${S.weeks.length} · ${dm(w.starts)}–${dm(w.ends)}` : 'План' }),
+      weightCard,
+    ),
+    daysCard,
+    tasksCard,
+    reportsCard,
+    goalsCard,
   );
 }
 
