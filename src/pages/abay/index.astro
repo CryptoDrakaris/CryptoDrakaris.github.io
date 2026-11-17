@@ -4,6 +4,22 @@
 // Всё содержимое рисует клиент после входа (src/abay/app.ts); в HTML только каркас.
 import '../../styles/fonts.css';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+// CSP: скрипты, стили и шрифты только свои, сеть – только к своему проекту Supabase.
+// Это защищает саму страницу трекера; от уязвимостей на других страницах того же
+// домена (они видят localStorage с сессией) защищает только отдельный поддомен.
+const sbUrl = import.meta.env.PUBLIC_ABAY_SUPABASE_URL as string | undefined;
+const sbOrigin = sbUrl ? new URL(sbUrl).origin : '';
+const csp = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self'",
+  "img-src 'self' data:",
+  `connect-src 'self'${sbOrigin ? ` ${sbOrigin}` : ''}`,
+  "object-src 'none'",
+  "base-uri 'none'",
+  "form-action 'none'",
+].join('; ');
 ---
 
 <!doctype html>
@@ -13,6 +29,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="robots" content="noindex,nofollow" />
     <meta name="referrer" content="no-referrer" />
+    <meta http-equiv="Content-Security-Policy" content={csp} />
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#f6f3ee" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0b0b0d" media="(prefers-color-scheme: dark)" />
@@ -201,7 +218,9 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   .ab-week > summary::-webkit-details-marker { display: none; }
   .ab-week > summary::before { content: '▸'; color: var(--muted); width: 1em; }
   .ab-week[open] > summary::before { content: '▾'; }
-  .ab-week-title { font-family: var(--font-display); font-weight: 700; }
+  /* название недели – h2 внутри summary: скринридер переходит по неделям как по заголовкам */
+  .ab-wrap .ab-week-title { display: inline; font-family: var(--font-display); font-weight: 700; font-size: 1rem; margin: 0; letter-spacing: normal; }
+  .ab-late { display: block; font-size: 0.8rem; color: var(--muted); }
   .ab-week > p { margin-top: 8px; }
   .ab-badge { margin-left: auto; font-size: 0.8rem; font-weight: 600; padding: 2px 10px; border-radius: 999px; white-space: nowrap; }
   .ab-badge.ok { color: var(--ok); background: var(--ok-bg); }

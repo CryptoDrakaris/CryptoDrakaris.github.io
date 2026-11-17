@@ -1,19 +1,21 @@
 #!/usr/bin/env node
 // План Абая: однократная загрузка начальных данных в Supabase (цели, недели, задачи).
 //
-//   node scripts/abay-seed.mjs <путь к seed_plan.json> [--update]
+//   node scripts/abay-seed.mjs <путь к seed_plan.json> [--add-new] [--update] [--update-limits]
 //
 // Ключи – из окружения или локального .env (в git не попадает):
 //   ABAY_SUPABASE_URL=https://xxxx.supabase.co
 //   ABAY_SERVICE_ROLE_KEY=sb_secret_…   (или старый service_role JWT)
 // Ключ service role обходит RLS, поэтому живёт только на этом компьютере.
 //
-// Повторный запуск ничего не дублирует и не затирает сделанное в трекере:
-//   * недели обновляются (даты и срок отчёта);
-//   * новые цели и задачи добавляются, существующие не трогаются – значения целей,
-//     отметки «выполнено» и правки папы сохраняются;
-//   * с --update у существующих задач обновляются текст, раздел, неделя, замок и порядок,
-//     у целей – название, единица, границы и список вариантов (но не значение).
+// Первый запуск заполняет пустую базу. Повторный ничего не дублирует и не затирает сделанное
+// в трекере (правки папы, отметки, значения целей):
+//   * существующие недели, цели и задачи не трогаются; новые цели добавляются;
+//   * задачи из файла добавляются, только пока в базе нет ни одной задачи плана. Потом – только
+//     с --add-new (добавит те, которых нет; задачу, которую папа удалил, вернёт – осторожно);
+//   * --update меняет только тексты: название задачи, название и единицу цели, даты недель;
+//   * --update-limits меняет у целей границы, список вариантов и «может ли менять Абай».
+//     Это идёт мимо журнала изменений целей, поэтому отдельным флагом.
 // seed_plan.json содержит личные сведения и лежит вне репозитория (см. .gitignore).
 
 import { readFileSync } from 'node:fs';
@@ -22,6 +24,8 @@ try { process.loadEnvFile(); } catch { /* .env нет – берём из окр
 
 const [file, ...flags] = process.argv.slice(2);
 const update = flags.includes('--update');
+const updateLimits = flags.includes('--update-limits');
+const addNew = flags.includes('--add-new');
 const url = process.env.ABAY_SUPABASE_URL?.replace(/\/$/, '');
 const key = process.env.ABAY_SERVICE_ROLE_KEY;
 if (!file || !url || !key) {
@@ -94,20 +98,37 @@ const tasks = plan.weeks.flatMap((w) => w.tasks.map((t, i) => ({
   id: t.id, week: w.n, category: t.category, title: t.title, locked: Boolean(t.locked), sort: i,
 })));
 
+async function get(path) {
+  const res = await fetch(`${url}/rest/v1/${path}`, { headers });
+  if (!res.ok) throw new Error(`${path}: ${res.status} ${await res.text()}`);
+  return res.json();
+}
+
 try {
-  await upsert('abay_weeks', 'n', weeks, 'merge');
+  await upsert('abay_weeks', 'n', weeks, 'ignore');
   await upsert('abay_goals', 'key', goals, 'ignore');
-  await upsert('abay_tasks', 'id', tasks, 'ignore');
+  const planTasks = await get('abay_tasks?select=id&created_by=is.null');
+  if (planTasks.length === 0 || addNew) {
+    const have = new Set(planTasks.map((t) => t.id));
+    await upsert('abay_tasks', 'id', tasks.filter((t) => !have.has(t.id)), 'ignore');
+  } else {
+    console.log(`abay_tasks: в базе уже ${planTasks.length} задач плана – не добавляю (новые из файла: --add-new)`);
+  }
   if (update) {
+    for (const w of weeks) {
+      const { n, ...dates } = w;
+      await patch('abay_weeks', `n=eq.${n}`, dates);
+    }
+    for (const g of goals) await patch('abay_goals', `key=eq.${encodeURIComponent(g.key)}`, { title: g.title, unit: g.unit });
+    for (const t of tasks) await patch('abay_tasks', `id=eq.${encodeURIComponent(t.id)}`, { title: t.title });
+    console.log(`--update: обновлены даты недель, названия ${goals.length} целей и тексты ${tasks.length} задач`);
+  }
+  if (updateLimits) {
     for (const g of goals) {
-      const { key: k, value, ...meta } = g;
-      await patch('abay_goals', `key=eq.${encodeURIComponent(k)}`, meta);
+      await patch('abay_goals', `key=eq.${encodeURIComponent(g.key)}`,
+        { editable_by_son: g.editable_by_son, min_value: g.min_value, max_value: g.max_value, options: g.options });
     }
-    for (const t of tasks) {
-      const { id, ...rest } = t;
-      await patch('abay_tasks', `id=eq.${encodeURIComponent(id)}`, rest);
-    }
-    console.log(`--update: обновлены описания ${goals.length} целей и ${tasks.length} задач (значения целей и отметки не тронуты)`);
+    console.log(`--update-limits: обновлены границы ${goals.length} целей (в журнал изменений это не попадает)`);
   }
   console.log('Готово.');
 } catch (e) {

@@ -23,6 +23,12 @@ language sql stable security definer set search_path = public as $$
   select role from abay_profiles where user_id = auth.uid()
 $$;
 
+-- Сегодняшняя дата по Астане (UTC+5, без перехода на летнее время).
+create or replace function abay_today() returns date
+language sql stable set search_path = public as $$
+  select (now() at time zone 'utc' + interval '5 hours')::date
+$$;
+
 create table if not exists abay_goals (
   key text primary key,
   title text not null,
@@ -80,6 +86,12 @@ create table if not exists abay_checkins (
   updated_at timestamptz not null default now(),
   updated_by uuid references auth.users(id)
 );
+-- Когда отметку внесли впервые: папа видит дни, заполненные задним числом.
+-- Для уже существующих строк берём время последней правки (точнее данных нет).
+alter table abay_checkins add column if not exists created_at timestamptz;
+update abay_checkins set created_at = updated_at where created_at is null;
+alter table abay_checkins alter column created_at set default now();
+alter table abay_checkins alter column created_at set not null;
 
 create table if not exists abay_reports (
   week int primary key references abay_weeks(n),
@@ -106,6 +118,16 @@ create table if not exists abay_comments (
 create or replace function abay_tg_stamp_checkin() returns trigger
 language plpgsql set search_path = public as $$
 begin
+  -- участники не пишут будущие дни и дни до начала плана (service role – без ограничений)
+  if auth.uid() is not null then
+    if new.day > abay_today() then raise exception 'нельзя отмечать день, который ещё не наступил'; end if;
+    if new.day < (select min(starts) from abay_weeks) then raise exception 'этот день раньше начала плана'; end if;
+  end if;
+  if tg_op = 'INSERT' then
+    new.created_at := now();
+  else
+    new.created_at := old.created_at;
+  end if;
   new.updated_at := now();
   new.updated_by := coalesce(auth.uid(), new.updated_by);
   return new;
@@ -243,8 +265,10 @@ create policy abay_upd_checkins on abay_checkins for update to authenticated
 create policy abay_del_checkins on abay_checkins for delete to authenticated
   using ((select abay_role()) = 'father');
 
+-- Отчёт можно сдать только за неделю, которая уже началась.
 create policy abay_ins_reports on abay_reports for insert to authenticated
-  with check ((select abay_role()) in ('father','son'));
+  with check ((select abay_role()) in ('father','son')
+    and exists (select 1 from abay_weeks w where w.n = week and w.starts <= abay_today()));
 create policy abay_upd_reports on abay_reports for update to authenticated
   using ((select abay_role()) in ('father','son')) with check ((select abay_role()) in ('father','son'));
 create policy abay_del_reports on abay_reports for delete to authenticated
@@ -375,6 +399,7 @@ end $$;
 
 -- В Supabase функции по умолчанию доступны и anon: закрываем явно.
 revoke all on function abay_role() from public, anon;
+revoke all on function abay_today() from public, anon;
 revoke all on function abay_change_goal(text, jsonb, text) from public, anon;
 revoke all on function abay_set_task(text, boolean, text) from public, anon;
 revoke all on function abay_check_task_input(int, text, text) from public, anon, authenticated;
@@ -387,6 +412,7 @@ revoke all on function abay_tg_stamp_task() from public, anon, authenticated;
 revoke all on function abay_tg_stamp_comment() from public, anon, authenticated;
 
 grant execute on function abay_role() to authenticated;
+grant execute on function abay_today() to authenticated;
 grant execute on function abay_change_goal(text, jsonb, text) to authenticated;
 grant execute on function abay_set_task(text, boolean, text) to authenticated;
 grant execute on function abay_add_task(int, text, text) to authenticated;

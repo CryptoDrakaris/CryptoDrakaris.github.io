@@ -14,7 +14,7 @@ interface Goal { key: string; title: string; value: number | string; unit: strin
 interface GoalChange { id: number; key: string; old_value: unknown; new_value: unknown; reason: string; changed_by: string; changed_at: string }
 interface Week { n: number; starts: string; ends: string; report_due: string }
 interface Task { id: string; week: number; category: string; title: string; locked: boolean; sort: number; done: boolean; done_at: string | null; note: string | null; created_by: string | null }
-interface Checkin { day: string; weight: number | null; steps: number | null; habits: Record<string, boolean>; note: string | null; updated_by: string | null }
+interface Checkin { day: string; weight: number | null; steps: number | null; habits: Record<string, boolean>; note: string | null; updated_by: string | null; created_at?: string; updated_at?: string }
 interface Report { week: number; weight: number | null; waist: number | null; submitted_at: string; submitted_by: string | null; [k: string]: unknown }
 interface Comment { id: number; week: number | null; text: string; author: string; created_at: string }
 
@@ -87,6 +87,11 @@ function weekStatus(w: Week): WeekStatus {
   return { text: 'идёт', tone: 'now' };
 }
 
+/** Дата по Астане для отметки времени из базы. */
+function astanaDay(ts: string): string {
+  return new Date(Date.parse(ts) + TZ_OFFSET_MIN * 60_000).toISOString().slice(0, 10);
+}
+
 /** План по весу на дату: от стартового веса минус «снижение в неделю» за каждую неделю. */
 function planWeight(iso: string): number {
   const start = goalNum('start_weight', 125);
@@ -141,7 +146,7 @@ async function loadAll() {
     q<GoalChange[]>(c.from('abay_goal_changes').select('*').order('changed_at', { ascending: false })),
     q<Week[]>(c.from('abay_weeks').select('*').order('n')),
     q<Task[]>(c.from('abay_tasks').select('id, week, category, title, locked, sort, done, done_at, note, created_by').order('week').order('sort').order('created_at')),
-    q<Checkin[]>(c.from('abay_checkins').select('day, weight, steps, habits, note, updated_by').order('day')),
+    q<Checkin[]>(c.from('abay_checkins').select('day, weight, steps, habits, note, updated_by, created_at, updated_at').order('day')),
     q<Report[]>(c.from('abay_reports').select('*').order('week')),
     q<Comment[]>(c.from('abay_comments').select('*').order('created_at')),
   ]);
@@ -279,8 +284,15 @@ function openTab(id: TabId, focusPanel: boolean) {
   if (focusPanel) panel.focus({ preventScroll: true });
 }
 
+// Ввод пользователя на текущем экране: пока он есть, автообновление экран не перерисовывает.
+let touched = false;
+let renderedDay = '';
+panel.addEventListener('input', () => { touched = true; });
+
 function rerender() {
   const t = TABS.find((x) => x.id === activeTab)!;
+  touched = false;
+  renderedDay = todayISO();
   clear(panel, t.render());
 }
 
@@ -321,11 +333,19 @@ function renderToday(): Node {
       const s = parseNum(steps.value);
       if (Number.isNaN(w) || (w !== null && (w < 40 || w > 250))) return st.bad('Вес – число от 40 до 250, например 124,6.');
       if (Number.isNaN(s) || (s !== null && (s < 0 || s > 100000 || !Number.isInteger(s)))) return st.bad('Шаги – целое число, например 8500.');
-      if (!dayInput.value || dayInput.value > today) return st.bad('Выбери дату не позже сегодняшней.');
+      // страница могла пролежать открытой с вечера: тогда в форме вчерашняя дата
+      const now = todayISO();
+      if (now !== today && dayInput.value === today) {
+        dayInput.max = now;
+        dayInput.value = now;
+        return st.bad(`Наступил новый день: дата в форме сменилась на ${dm(now)}. Проверь цифры и нажми «Сохранить» ещё раз.`);
+      }
+      if (!dayInput.value || dayInput.value > now) return st.bad('Выбери дату не позже сегодняшней.');
       const habits = Object.fromEntries(boxes.map((b) => [b.name, b.checked]));
       try {
         await q(sb!.from('abay_checkins').upsert({ day: dayInput.value, weight: w, steps: s, habits, note: note.value.trim() || null }, { onConflict: 'day' }).select());
         await loadAll();
+        touched = false; // сохранено – автообновление снова можно
         st.ok(`Сохранено: ${dm(dayInput.value)}, ${weekday(dayInput.value)}.`);
       } catch (err) {
         st.bad(errText(err));
@@ -394,7 +414,8 @@ function taskRow(t: Task, editable: boolean): HTMLElement {
   });
   const mine = t.created_by !== null && t.created_by === uid();
   const canEdit = editable && (isFather() || (mine && !t.locked));
-  li.append(
+  // clear() из util пропускает null; нативный append превратил бы его в текст «null»
+  clear(li,
     h('label', { class: 'ab-check', for: id }, box,
       h('span', null, t.title,
         t.locked ? h('span', { class: 'ab-lock', title: 'Задачу меняет папа', text: ' 🔒' }) : null,
@@ -422,8 +443,10 @@ function taskRow(t: Task, editable: boolean): HTMLElement {
 function categorySelect(id: string, value?: string) {
   return h('select', { id }, CATEGORY_KEYS.map((c) => h('option', { value: c, text: CATEGORIES[c], selected: c === value })));
 }
-function weekSelect(id: string, value: number) {
-  return h('select', { id }, S.weeks.map((w) => h('option', { value: String(w.n), text: `Неделя ${w.n} (${dm(w.starts)}–${dm(w.ends)})`, selected: w.n === value })));
+function weekSelect(id: string, value: number, onlyStarted = false) {
+  // отчёт сдаётся только за начавшуюся неделю (то же правило в базе)
+  const weeks = onlyStarted ? S.weeks.filter((w) => w.starts <= todayISO()) : S.weeks;
+  return h('select', { id }, (weeks.length ? weeks : S.weeks.slice(0, 1)).map((w) => h('option', { value: String(w.n), text: `Неделя ${w.n} (${dm(w.starts)}–${dm(w.ends)})`, selected: w.n === value })));
 }
 
 function taskEditor(t: Task): HTMLElement {
@@ -490,7 +513,7 @@ function renderWeeks(): Node {
     const comments = S.comments.filter((c) => c.week === w.n);
     return h('details', { class: 'ab-card ab-week', open: w.n === cur?.n },
       h('summary', null,
-        h('span', { class: 'ab-week-title', text: `Неделя ${w.n}` }),
+        h('h2', { class: 'ab-week-title', text: `Неделя ${w.n}` }),
         h('span', { class: 'ab-muted', text: ` ${dm(w.starts)}–${dm(w.ends)}` }),
         h('span', { class: `ab-badge ${st.tone}`, text: st.text }),
       ),
@@ -523,6 +546,10 @@ function reportView(w: Week): HTMLElement {
       h('p', { class: st.tone === 'bad' ? 'ab-bad' : 'ab-muted small', text: st.tone === 'bad' ? `Не сдан, срок был ${dateTime(w.report_due)}.` : `Ещё не сдан. Срок – ${dateTime(w.report_due)}.` }));
   }
   const late = Date.parse(r.submitted_at) > Date.parse(w.report_due);
+  // правка после сдачи: позже чем через 2 минуты (повторное нажатие «Сохранить» сразу не считаем)
+  const updated = r.updated_at as string | undefined;
+  const edited = !!updated && Date.parse(updated) - Date.parse(r.submitted_at) > 120_000;
+  const editedLate = edited && Date.parse(updated!) > Date.parse(w.report_due);
   const rows: [string, string][] = [];
   if (r.weight != null) rows.push(['Вес', `${num(Number(r.weight), 1)} кг (план ${num(planWeight(w.ends), 1)})`]);
   if (r.waist != null) rows.push(['Талия', `${num(Number(r.waist), 1)} см`]);
@@ -533,6 +560,7 @@ function reportView(w: Week): HTMLElement {
   return h('div', { class: 'ab-report' },
     h('h3', { class: 'ab-sub', text: 'Отчёт Абая' }),
     h('p', { class: 'ab-muted small', text: `Сдан ${dateTime(r.submitted_at)}${late ? ' – после срока' : ''}.` }),
+    edited ? h('p', { class: editedLate ? 'ab-bad small' : 'ab-muted small', text: `Изменён ${dateTime(updated!)} (${nameOf(r.updated_by as string | null)})${editedLate ? ' – после срока' : ''}.` }) : null,
     h('dl', { class: 'ab-dl' }, rows.map(([k, v]) => [h('dt', { text: k }), h('dd', { class: v === '–' ? 'ab-muted' : '', text: v })])),
   );
 }
@@ -565,7 +593,7 @@ function renderReport(): Node {
   const prev = S.weeks.find((w) => w.n === def - 1);
   if (prev && !S.reports.some((r) => r.week === prev.n) && daysBetween(prev.ends, todayISO()) <= 1) def = prev.n;
 
-  const wk = weekSelect('ab-r-week', def);
+  const wk = weekSelect('ab-r-week', def, true);
   const weight = h('input', { type: 'text', id: 'ab-r-weight', inputmode: 'decimal', autocomplete: 'off' });
   const waist = h('input', { type: 'text', id: 'ab-r-waist', inputmode: 'decimal', autocomplete: 'off' });
   const fields = REPORT_FIELDS.map((f) => h('textarea', { id: `ab-r-${f.key}`, name: f.key, rows: 2 }));
@@ -604,6 +632,7 @@ function renderReport(): Node {
         await q(sb!.from('abay_reports').upsert(row, { onConflict: 'week' }).select());
         await loadAll();
         fill();
+        touched = false;
         st.ok('Отчёт сохранён. Папа его увидит.');
       } catch (err) {
         st.bad(errText(err));
@@ -908,6 +937,9 @@ function renderSummary(): Node {
   for (let d = today; d >= from; d = addDays(d, -1)) dayList.push(d);
   const stepsGoal = goalNum('steps', 8000);
   const filled = dayList.filter((d) => S.checkins.some((c) => c.day === d)).length;
+  // заполнено задним числом: отметку впервые внесли на следующий день или позже
+  const lateDay = (c: Checkin) => (c.created_at ? astanaDay(c.created_at) : c.day) > c.day;
+  const filledLate = dayList.filter((d) => { const c = S.checkins.find((x) => x.day === d); return c && lateDay(c); }).length;
   const dayRows = dayList.map((d) => {
     const c = S.checkins.find((x) => x.day === d);
     const label = `${weekday(d)} ${dm(d)}`;
@@ -917,8 +949,9 @@ function renderSummary(): Node {
         h('td', { colspan: 3, class: d === today ? 'ab-muted' : 'ab-bad', text: d === today ? 'ещё не заполнен' : 'не заполнен' }));
     }
     const nHab = HABITS.filter((hb) => c.habits?.[hb.key]).length;
+    const late = lateDay(c);
     return h('tr', null,
-      h('td', { text: label }),
+      h('td', null, label, late ? h('span', { class: 'ab-late', text: `внесено ${dm(astanaDay(c.created_at!))}` }) : null),
       h('td', { text: c.weight != null ? num(Number(c.weight), 1) : '–' }),
       h('td', { class: c.steps != null && c.steps < stepsGoal ? 'ab-bad' : '', text: c.steps != null ? num(c.steps) : '–' }),
       h('td', { text: `${nHab} из ${HABITS.length}` }));
@@ -926,7 +959,7 @@ function renderSummary(): Node {
   const notes = dayList.map((d) => S.checkins.find((c) => c.day === d)).filter((c): c is Checkin => !!c?.note?.trim());
   const daysCard = h('div', { class: 'ab-card' },
     h('h2', { text: 'Последние 7 дней' }),
-    h('p', { class: filled < dayList.length - 1 ? 'ab-bad' : 'ab-muted small', text: `Заполнено дней: ${filled} из ${dayList.length}. Цель по шагам – ${num(stepsGoal)}.` }),
+    h('p', { class: filled < dayList.length - 1 ? 'ab-bad' : 'ab-muted small', text: `Заполнено дней: ${filled} из ${dayList.length}${filledLate ? `, из них задним числом – ${filledLate}` : ''}. Цель по шагам – ${num(stepsGoal)}.` }),
     h('table', { class: 'ab-table' },
       h('thead', null, h('tr', null, h('th', { text: 'День' }), h('th', { text: 'Вес' }), h('th', { text: 'Шаги' }), h('th', { text: 'Отметки' }))),
       h('tbody', null, dayRows)),
@@ -1036,9 +1069,11 @@ if (!sb) {
 let hiddenAt = 0;
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { hiddenAt = Date.now(); return; }
-  // формы «Сегодня» и «Отчёт» и открытые редакторы не трогаем: несохранённый ввод не должен пропасть
-  const dirty = [...panel.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input[type=text], textarea')].some((el) => el.value.trim() !== '');
-  const safe = activeTab !== 'today' && activeTab !== 'report' && !dirty;
-  if (S.me && safe && hiddenAt && Date.now() - hiddenAt > 5 * 60_000) refresh().catch(() => {});
+  if (!S.me || touched) return; // начатый ввод не теряем
+  // наступил новый день – перерисовать любую вкладку, иначе «Сегодня» запишет вчерашнюю дату
+  if (todayISO() !== renderedDay) { refresh().catch(() => {}); return; }
+  // формы «Сегодня» и «Отчёт» без смены дня не трогаем; остальные – если прошло больше 5 минут
+  const safe = activeTab !== 'today' && activeTab !== 'report';
+  if (safe && hiddenAt && Date.now() - hiddenAt > 5 * 60_000) refresh().catch(() => {});
 });
 
