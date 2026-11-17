@@ -307,7 +307,7 @@ async function refresh() {
 function renderToday(): Node {
   const today = todayISO();
   const dayInput = h('input', { type: 'date', id: 'ab-day', value: today, max: today, min: START });
-  const weight = h('input', { type: 'text', id: 'ab-weight', inputmode: 'decimal', autocomplete: 'off', placeholder: 'например, 124,6' });
+  const weight = h('input', { type: 'text', id: 'ab-weight', inputmode: 'decimal', autocomplete: 'off', required: true, 'aria-required': 'true', placeholder: 'например, 124,6' });
   const steps = h('input', { type: 'text', id: 'ab-steps', inputmode: 'numeric', autocomplete: 'off', placeholder: `цель ${num(goal('steps')?.value ?? 8000)}` });
   const note = h('textarea', { id: 'ab-note', rows: 2, placeholder: 'Как прошёл день (по желанию)' });
   const boxes = HABITS.map((hb) => h('input', { type: 'checkbox', id: `ab-h-${hb.key}`, name: hb.key }));
@@ -331,7 +331,9 @@ function renderToday(): Node {
       st.clear();
       const w = parseNum(weight.value);
       const s = parseNum(steps.value);
-      if (Number.isNaN(w) || (w !== null && (w < 40 || w > 250))) return st.bad('Вес – число от 40 до 250, например 124,6.');
+      // вес обязателен каждый день (решение папы): утром натощак
+      if (w === null) { weight.focus(); return st.bad('Укажи вес утром натощак – без него день не сохранится.'); }
+      if (Number.isNaN(w) || w < 40 || w > 250) return st.bad('Вес – число от 40 до 250, например 124,6.');
       if (Number.isNaN(s) || (s !== null && (s < 0 || s > 100000 || !Number.isInteger(s)))) return st.bad('Шаги – целое число, например 8500.');
       // страница могла пролежать открытой с вечера: тогда в форме вчерашняя дата
       const now = todayISO();
@@ -355,7 +357,7 @@ function renderToday(): Node {
     h('h2', { text: 'Отметка за день' }),
     h('div', { class: 'ab-grid3' },
       h('div', null, h('label', { for: 'ab-day', text: 'Дата' }), dayInput),
-      h('div', null, h('label', { for: 'ab-weight', text: 'Вес, кг' }, h('span', { class: 'ab-opt', text: ' по желанию' })), weight),
+      h('div', null, h('label', { for: 'ab-weight', text: 'Вес утром натощак, кг' }), weight),
       h('div', null, h('label', { for: 'ab-steps', text: 'Шаги' }), steps),
     ),
     h('fieldset', { class: 'ab-habits' },
