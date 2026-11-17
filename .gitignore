@@ -18,3 +18,6 @@ data/archive-broken.json
 # os
 .DS_Store
 Thumbs.db
+
+# План Абая: начальные данные с личными сведениями живут вне репозитория
+seed_plan.json

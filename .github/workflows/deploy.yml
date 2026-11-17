@@ -43,6 +43,10 @@ jobs:
         env:
           SITE: ${{ steps.pages.outputs.origin }}
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          # План Абая (/abay/): адрес и публичный ключ Supabase – переменные Actions
+          # (Settings -> Secrets and variables -> Actions -> Variables). Ключ service role сюда не кладётся.
+          PUBLIC_ABAY_SUPABASE_URL: ${{ vars.ABAY_SUPABASE_URL }}
+          PUBLIC_ABAY_SUPABASE_KEY: ${{ vars.ABAY_SUPABASE_KEY }}
         run: npm run build
       - name: No unsafe links in the build
         # token metadata is written by strangers; only https, own files and own pages may be linked

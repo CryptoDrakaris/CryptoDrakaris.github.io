@@ -14,6 +14,11 @@ export default defineConfig({
   // Корень / – noindex-заглушка с выбором языка, в карте сайта ему не место:
   // поисковик ругается на «submitted URL marked noindex».
   integrations: [
-    sitemap({ filter: (page) => !page.endsWith('/404/') && new URL(page).pathname !== (process.env.BASE_PATH || '/') }),
+    sitemap({
+      filter: (page) =>
+        !page.endsWith('/404/') &&
+        !new URL(page).pathname.endsWith('/abay/') && // закрытый трекер, noindex
+        new URL(page).pathname !== (process.env.BASE_PATH || '/'),
+    }),
   ],
 });
