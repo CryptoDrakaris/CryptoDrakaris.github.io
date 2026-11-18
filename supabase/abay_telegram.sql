@@ -7,7 +7,8 @@
 --   * всё это недоступно сайту: у anon и authenticated нет прав ни на таблицу, ни на функции.
 --     Настраивает скрипт scripts/abay-tg.mjs с ключом service role из локального .env.
 --
--- Расписание (Астана): 08:00 – «взвесься», 11:00 – повтор, если веса нет, 21:00 – папе, если веса так и нет.
+-- Расписание (Астана): 08:00 – «взвесься», 11:00 – повтор, если веса нет, 20:00 – итоги дня (и недельный отчёт
+-- в последний день недели, если не сдан), 21:00 – папе, если веса так и нет.
 
 -- Защита от запуска не в том проекте: здесь должна быть схема трекера.
 do $$ begin
@@ -60,12 +61,16 @@ begin
   );
 end $$;
 
--- Напоминание по расписанию: kind = morning | late | father; test и test_father – проверка.
+-- Напоминание по расписанию: kind = morning | late | father | evening; test и test_father – проверка.
 create or replace function abay_tg_remind(kind text) returns bigint
 language plpgsql security definer set search_path = public as $$
 declare
   d date := abay_today();
   link constant text := 'https://cryptodrakaris.github.io/abay/';
+  c abay_checkins;
+  wk abay_weeks;
+  day_msg text;
+  rep_msg text;
 begin
   if kind = 'test' then
     return abay_tg_send('son', 'Проверка: бот трекера «План Абая» работает. Утром он напомнит про вес.');
@@ -73,9 +78,28 @@ begin
     return abay_tg_send('father', 'Проверка: бот трекера «План Абая» работает. Если Абай не внесёт вес до 21:00, придёт сообщение.');
   end if;
   -- только в дни плана
-  if not exists (select 1 from abay_weeks where d between starts and ends) then return null; end if;
-  -- вес за сегодня уже внесён – молчим
-  if exists (select 1 from abay_checkins where day = d and weight is not null) then return null; end if;
+  select * into wk from abay_weeks where d between starts and ends;
+  if not found then return null; end if;
+  select * into c from abay_checkins where day = d;
+
+  if kind = 'evening' then
+    -- итоги дня: отметки нет совсем или её последний раз сохраняли до 15:00 по Астане (только утренний вес)
+    if c.day is null then
+      day_msg := 'За сегодня в трекере ничего не отмечено. Внеси вес, шаги, привычки и заметку о дне.';
+    elsif (c.updated_at at time zone 'utc' + interval '5 hours')::time < time '15:00' then
+      day_msg := 'Вечер – отметь итоги дня: шаги, привычки, заметку. Открой «Сегодня» и нажми «Сохранить».';
+    end if;
+    -- в последний день недели – отчёт, если не сдан (срок – report_due)
+    if d = wk.ends and not exists (select 1 from abay_reports where week = wk.n) then
+      rep_msg := 'Сегодня последний день недели ' || wk.n || ': сдай недельный отчёт до '
+                 || to_char(wk.report_due at time zone 'utc' + interval '5 hours', 'HH24:MI') || ' (вкладка «Отчёт»).';
+    end if;
+    if day_msg is null and rep_msg is null then return null; end if;
+    return abay_tg_send('son', concat_ws(E'\n\n', day_msg, rep_msg) || E'\n' || link);
+  end if;
+
+  -- утро и папа: только про вес; вес за сегодня уже внесён – молчим
+  if c.weight is not null then return null; end if;
   if kind = 'morning' then
     return abay_tg_send('son', 'Доброе утро! Взвесься натощак и внеси вес в трекер: ' || link);
   elsif kind = 'late' then
@@ -105,6 +129,7 @@ grant execute on function abay_tg_result(bigint) to service_role;
 -- Расписание. Повторный запуск обновляет задания с теми же именами.
 select cron.schedule('abay-weight-morning', '0 3 * * *', $$select public.abay_tg_remind('morning')$$);
 select cron.schedule('abay-weight-late',    '0 6 * * *', $$select public.abay_tg_remind('late')$$);
+select cron.schedule('abay-day-evening',    '0 15 * * *', $$select public.abay_tg_remind('evening')$$);
 select cron.schedule('abay-weight-father',  '0 16 * * *', $$select public.abay_tg_remind('father')$$);
 
 -- Чтобы API сразу увидел новые функции.
